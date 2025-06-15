@@ -47,7 +47,7 @@ The pinouts of these vintage SRAM chips can be found here:
 
 ![2114 Chip](pics/2114-pinout.png)
 
-![6116 Pinout](pics/6116-Pinout.png)
+![6116 Pinout](pics/6116-pinout.png)
 
 The specs of these vintage SRAM chips are: 
 - 2112: 256 x 4 bits
