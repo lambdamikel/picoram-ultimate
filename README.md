@@ -139,7 +139,7 @@ presses. The analog threshold values for the different buttons are
 specified in the `ULTIMATE.INI` file. 
 
 **Note that proper thresholds are extremely important for a reliable
-and error-free operation of PicoRAM** Every time a UI button is
+and error-free operation of PicoRAM.** Every time a UI button is
 pressed, the Pico onboard LED will be lit. If the onboard LED comes
 one randomly with not button being pressed, then the `CANCEL` button
 threshold is too high and the system detects erroneous button
