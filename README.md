@@ -153,7 +153,7 @@ It may hence be necessary to "tune" these analog threshold levels to
 match your machine. **If your machine does not work with the
 corresponding [supplied default `ULTIMATE.INI` files](software/)**,
 then you will have to determine the threshold values yourself.  There
-are two methods of doing so which are described in the next
+are two methods for doing so. These methods are described in the next
 subsection.
 
 
