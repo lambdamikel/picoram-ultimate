@@ -490,7 +490,7 @@ See [here.](gerbers/PicoRAM6116-Gerbers.zip)
 ## Firmware Image
 
 The current version is 1.0, June 2025. The `.uf2` image can be
-found [here.](firmware/picoram_ultimate.uf2)
+found [here.](firmware/v1.0/picoram_ultimate.uf2)
 
 ## Firmware Sources
 
