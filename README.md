@@ -141,13 +141,13 @@ specified in the `ULTIMATE.INI` file.
 **Note that proper thresholds are extremely important for a reliable
 and error-free operation of PicoRAM.** Every time a UI button is
 pressed, the Pico onboard LED will be lit. If the onboard LED comes
-one randomly with not button being pressed, then the `CANCEL` button
-threshold is too high and the system detects erroneous button
-presses. This usually toggles the OLED on and off randomly then. Every
-time a button is pressed, PicoRAM pauses RAM emulation (i.e., the
-WAIT/READY/BUSY line of the host system CPU is pulled low). Thus, if
-you are getting random behavior, the threshold values are not suitable
-for your machine and must be adjusted.
+one randomly when no button has been pressed, then the `CANCEL` button
+threshold is too high and the system detects spurious button presses
+caused by noise and ADC value fluctuations. PicoRAM pauses RAM
+emulation (i.e., the WAIT/READY/BUSY line of the host system CPU is
+pulled low) when an (erroneous) button press has been detected. Thus,
+if you are getting random behavior, the threshold values are not
+suitable for your machine and must be adjusted.
 
 Hence, it may hence be necessary for you to "tune" these analog
 threshold levels to match your machine. **If your machine does not
