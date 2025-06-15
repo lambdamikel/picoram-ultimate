@@ -210,13 +210,13 @@ PicoRAM. Examples for proper init files can be found
 2. If you start PicoRAM from an `ULTIMATE.INI` file that has a `1`
 entry as its last line, it will just start an infinite loop which will
 display the analog values as they are being read. You can determine
-the thresholds by using a save upper bound from the values that you
-are observing for the button being held down; for example, here we are
-observing (noisy) values for the `OK` button in the `0x800` to `0x8F0`
-range: ![Tuning](pics/tuning2.jpg)
+the thresholds by using a safe upper bound found from the values that
+you are observing, for each button. For example, here we are observing
+(noisy) values for the `OK` button in the `0x800` to `0x8F0` range:
+![Tuning](pics/tuning2.jpg)
 
     A threshold value of `0x900` would hence be a good choice for the
-OK button in the `ULTIMATE.INI` file (4th line).
+OK button threshold in the `ULTIMATE.INI` file (4th line).
 
 ## Host Machine-Specific Configuration
 
