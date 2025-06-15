@@ -391,10 +391,10 @@ Moreover, the JP5 setting for 2 KBs
 **does not work for the MasterLab** - but might work for a different
 host machine with 4 2114 chips. Check [the schematics.](pics/schematics.png)
 
-Note that the a jumper wire is required that connects the `HALT` pin
-of the `J3` header to the MasterLab's `Master Reset` as follows -
-this is the first top-most connector socket that is not 
-occupied by a wire bridge:
+Note that a jumper wire is required that connects the `HALT` pin of
+the `J3` header to the MasterLab's `Master Reset` as follows - this is
+the first top-most connector socket that is not occupied by a wire
+bridge:
 
 ![MasterLab Mod 2](pics/ultimate-masterlab2.JPG)
 
