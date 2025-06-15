@@ -108,7 +108,7 @@ jumper settings can be found on the PCB as well:
 
 - Easy build & installation: PicoRAM 6116 uses pre-assembled
   off-the-shelf modules and through-hole components only, and no
-  (destructive) modifications to the Microprofessor are required.
+  (destructive) modifications to the SBCs are required (e.g., trace cuts). It may be necessary to install chip sockets though.
 
 ## User Interface
 
@@ -477,7 +477,7 @@ Here is [a PDF of the schematics.](pics/schematics.pdf)
 
 ### Printed Circuit Board (PCB)
 
-The current version is Rev. 4, December 2023.
+The current version is Rev. 1, June 2025.
 
 ![PCB](pics/pcb.png)
 
@@ -491,7 +491,7 @@ See [here.](gerbers/PicoRAM6116-Gerbers.zip)
 
 ## Firmware Image
 
-The current version is 1.0, December 2025. The `.uf2` image can be
+The current version is 1.0, June 2025. The `.uf2` image can be
 found [here.](firmware/picoram_ultimate.uf2)
 
 ## Firmware Sources
