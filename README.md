@@ -222,8 +222,7 @@ OK button threshold in the `ULTIMATE.INI` file (4th line).
 
 PicoRAM supports multiple host machines / SBCs. A machine
 type-identifier in the first line on the `ULTIMATE.INI` file
-determines the machine type; have a look at the supplied init files
-for the different machine types in [software/](software/) directory.
+determines the machine type.
 
 The following types are supported; each host system is described in
 more detail below.
