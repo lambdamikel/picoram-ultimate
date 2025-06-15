@@ -301,8 +301,7 @@ The pinout of the expansion header is as follows:
 
 ![ET-3400 Exp.Header 4](pics/et3400-connector.jpg)
 
-Note that the RE signal is shown as `NC` in this pinout, between `A12
-- A13` and `A2 - A3`. Unlike depicted by Pictorial 1-6, the resistor
+Note that the RE signal is shown as `NC` in this pinout, between `A12 A13` and `A2 A3`. Unlike depicted by Pictorial 1-6, the resistor
 and diode are not required for PicoRAM Ultimate. However, if already
 fitted and installed, they shouldn't cause problems for PicoRAM
 either.
