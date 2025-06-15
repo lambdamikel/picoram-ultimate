@@ -485,7 +485,7 @@ There is also a [Bill of Material (BOM).](gerbers/BOM.csv)
 
 ![Gerbers](pics/pcb-2d.png)
 
-See [here.](gerbers/PicoRAM6116-Gerbers.zip) 
+See [here.](gerbers/gerbers.zip) 
 
 ## Firmware Image
 
