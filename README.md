@@ -85,7 +85,7 @@ jumper settings can be found on the PCB as well:
 
 ## Features 
 
-- Supports multiple host machines: ET-3400, Lab-Volt 6500,
+- Supports multiple host machines: ET-3400, Lab-Volt 6502,
   Microprofessor MPF-1 series, and Philips MasterLab MC6400.
 
 - Convenient PicoRAM configuration: PicoRAM has one universal firmware
