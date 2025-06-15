@@ -149,12 +149,12 @@ pulled low) when an (erroneous) button press has been detected. Thus,
 if you are getting random behavior, the threshold values are not
 suitable for your machine and must be adjusted.
 
-Hence, it may hence be necessary for you to "tune" these analog
-threshold levels to match your machine. **If your machine does not
-work with the corresponding [supplied default `ULTIMATE.INI`
-files](software/)**, then you will have to determine the threshold
-values yourself.  There are two methods of doing so which are
-described in the next subsection.
+It may hence be necessary to "tune" these analog threshold levels to
+match your machine. **If your machine does not work with the
+corresponding [supplied default `ULTIMATE.INI` files](software/)**,
+then you will have to determine the threshold values yourself.  There
+are two methods of doing so which are described in the next
+subsection.
 
 
 But first, let us discuss an example `ULTIMATE.INI` file (here, for the Philips 
