@@ -130,7 +130,7 @@ file name creation, confirm and cancel, and so on. It will be obvious
 
 The 5 UI buttons are using the Pico's analog input. Unfortunately, the 
 analog levels on the Pico are very noisy and also vary from machine 
-to machine, depend on the host machines power supply, etc.
+to machine, depend on the host machine power supply, etc.
 
 The status of PicoRAM's UI buttons is read using an analog input on the
 Pico. The button decoding hence requires analog threshold values (in
