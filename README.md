@@ -371,7 +371,7 @@ is equipped with 2 2114 SRAM chips (1 KB of RAM):
 
 You will have to modify your MC6400 and put in sockets to accommodate
 PicoRAM as follows. The PCB is of very good quality, and with a little
-bit of soldering skills you will have no issue accomplishing this:
+bit of soldering skills you will have no issues accomplishing this:
 
 ![MasterLab Mod 1](pics/masterlab-mod1.jpg)
 
