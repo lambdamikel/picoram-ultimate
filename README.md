@@ -482,10 +482,10 @@ and the [Hackaday coverage of PicoRAM
 ![Development 4](pics/devel4.jpg)
 
 More details about the making of the project, and technical notes /
-development log can be found on the [PicoRAM 6116 Hackaday project
-page.](https://hackaday.io/project/194092-picoram-6116-sram-emulator-sd-card-interface)
-and [PicoRAM Ultimate Hackaday project
-page.](https://hackaday.io/project/203133-picoram-ultimate).
+development logs can be found on the [PicoRAM 6116 Hackaday project
+page](https://hackaday.io/project/194092-picoram-6116-sram-emulator-sd-card-interface)
+and the [PicoRAM Ultimate Hackaday project
+page.](https://hackaday.io/project/203133-picoram-ultimate)
 
 ## The Board 
 
