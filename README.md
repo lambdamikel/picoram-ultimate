@@ -236,7 +236,7 @@ more detail below.
 
 ### Stock Heathkit ET-3400 without Expansion Header
 
-The Heatkit ET-3400 is a Motorola MC6400-based CPU trainer from 
+The Heatkit ET-3400 is a Motorola MC6800-based CPU trainer from 
 ~1976 and can be considered as one of the very first CPU trainers.
 
 The stock system came with only 2 2112 SRAM chips (IC14 and IC15), or
@@ -249,7 +249,7 @@ and IC17 and can emulate 512 bytes of memory in the address range
 
 ![ET-3400 Stock Config 2](pics/ultimate-heathkit2.JPG)
 
-Note that this applies to the ET-3400 with original MC6400 CPU and
+Note that this applies to the ET-3400 with original MC6800 CPU and
 crystal, and that you will need a jumper cable from the `HALT` pin of
 PicoRAM's `J3` header to the ET-3400's `HALT` breadboard connector, as
 shown in the above picture.
@@ -275,7 +275,7 @@ can upgrade your machine to 2 KBs, address range: `0x0000 - 0x07ff`.
 
 ![ET-3400 Expanded 1](pics/ultimate-heathkit-exp1.JPG)
 
-Note that this applies to the ET-3400 with original MC6400 CPU and
+Note that this applies to the ET-3400 with original MC6800 CPU and
 crystal *with an installed (and fully wired-up) expansion header.* 
 
 The machine type string (1st line in the `ULTIMATE.INI`) is
