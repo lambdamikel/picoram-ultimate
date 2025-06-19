@@ -301,7 +301,7 @@ Note that the `RE` signal is shown as `NC` in this pinout, between
 and diode are not required for PicoRAM Ultimate. However, if already
 fitted and installed, they shouldn't cause problems for PicoRAM either
 (but I haven't tried). Alternatively, you can simply route a jumper
-wire from the `RE` pin of PicoRAM`s `J3` header to the corresponding
+wire from the `RE` pin of PicoRAM's `J3` header to the corresponding
 breadboard connector (but the expansion port `RE` connection is
 cleaner).
 
