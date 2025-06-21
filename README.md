@@ -31,6 +31,13 @@ Computer System](https://github.com/lambdamikel/picoram2090) and
 [PicoRAM 6116 for the Microprofessor
 MPF-1](https://github.com/lambdamikel/picoram6116).
 
+## Video
+
+[This YouTube video](https://youtu.be/UJutVvjddcg) shows most 
+currently suported machines (with the exception of the MPF-1P):
+
+![YouTube Video](pics/youtube.jpg)
+
 ## Overview 
 
 PicoRAM Ultimate is powered directly from the host machine; i.e., via
