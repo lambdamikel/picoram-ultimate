@@ -445,10 +445,6 @@ on the MPF's (1, 1B, 1P) primary (top-left) extension header via a
 jumper wire.  Double check `JP1` as well; for the Microprofessor, it
 needs to be set to R (for `CE`, pin 18).
 
-Please note that using **74F373** instead of the **74LS373** makes a
-difference regarding stability (it did for me). I hence recommend to
-use **74F373**. Your milage with **74LS373** may vary. 
-
 I also recommend to add an additional decoupling capacitor (104, 0.1
 uF / 100 nF) between GND and VCC of the 6116 socket to help with
 noise:
@@ -456,7 +452,7 @@ noise:
 ![MPF Capacitor](pics/mpf-capacitor.jpg)
 
 **If you encounter stability problems, try removing the 10k resistor
-array completely and use 74F373 instead of 74LS373.**
+array completely.**
 
 ![MPF Resistor](pics/mpf-resistor.jpg)
 
@@ -478,14 +474,12 @@ overclocked to 250 MHz to make this possible; this is completely in
 the safe range and does not affect the longevity of the RP2040 in any
 negative way.
 
-Due to a lack of GPIOs on the Pico, two 74F373 transparent octal
-latches are used to multiplex the (max) 11-bit address bus.  In many
-cases it is also possible to use 74LS373, but not always. In
-particular, the Microprofessor seems to require 74F373. The (up to)
-11-bit address is read in two batches of 6 and 5 bits, using the
-`SEL1` and `SEL2` signals from the Pico to `OE` (Output Enable) the
-first resp. second latch. The latches are merely used for their
-tri-state capabilities.
+Due to a lack of GPIOs on the Pico, two 74LS373 (or 74F373)
+transparent octal latches are used to multiplex the (max) 11-bit
+address bus. The (up to) 11-bit address is read in two batches of 6
+and 5 bits, using the `SEL1` and `SEL2` signals from the Pico to `OE`
+(Output Enable) the first resp. second latch. The latches are merely
+used for their tri-state capabilities.
 
 Unlike my previous design, [PicoRAM
 2090](https://github.com/lambdamikel/picoram2090), this design does
@@ -523,9 +517,9 @@ The current version is Rev. 1, June 2025.
 
 There is also a [Bill of Material (BOM).](gerbers/BOM.csv)
 
-Note that the resistor array should be 1K. The 2112, 2114, 6116 chips
-are only sockets, obviously (so you don't actually need to purchase
-any SRAM chips - PicoRAM emulates them). 
+**Note that the resistor array should be 10K (code: 103).** The 2112,
+2114, 6116 chips are only sockets, obviously (so you don't actually
+need to purchase any SRAM chips - PicoRAM emulates them).
 
 ### Gerbers 
 

@@ -21,7 +21,7 @@
 //
 //
 
-#define VERSION " v1.0 (C) 2025 "
+#define VERSION " v1.1 (C) 2025 "
 
 //
 // Supported Machines
@@ -2410,18 +2410,20 @@ int main() {
     gpio_set_function(gpio, GPIO_FUNC_SIO); 
     gpio_set_dir(gpio, GPIO_IN);
 
-    // LABVOLT: 
-    gpio_set_input_hysteresis_enabled(gpio, false);
+    // ONLY needed for LABVOLT! 
+    // see below, where this enabled for the LABVOLT ONLY 
+    // gpio_set_input_hysteresis_enabled(gpio, false);
 
   }
 
   for (gpio = DATA_GPIO_START; gpio < DATA_GPIO_END; gpio++) {
-      data_mask |= (1 << gpio);
-      gpio_init(gpio);
-      gpio_set_function(gpio, GPIO_FUNC_SIO); 
-      gpio_set_dir(gpio, GPIO_IN);
-      gpio_set_drive_strength(gpio, GPIO_DRIVE_STRENGTH_12MA);
-      gpio_set_slew_rate(gpio, GPIO_SLEW_RATE_FAST); 
+    data_mask |= (1 << gpio);
+    gpio_init(gpio);
+    gpio_set_function(gpio, GPIO_FUNC_SIO); 
+    gpio_set_dir(gpio, GPIO_IN);
+    // not necessary, and causes glitches with the Microprofessor!
+    // gpio_set_drive_strength(gpio, GPIO_DRIVE_STRENGTH_12MA);
+    // gpio_set_slew_rate(gpio, GPIO_SLEW_RATE_FAST); 
   }
 
   gpio_init(SEL1);
@@ -2521,4 +2523,4 @@ int main() {
   default : break;
   }
 
-}
+} 
