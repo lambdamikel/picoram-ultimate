@@ -456,8 +456,7 @@ noise:
 ![MPF Capacitor](pics/mpf-capacitor.jpg)
 
 **If you encounter stability problems, try removing the 10k resistor
-array completely - the predecessor project, PicoRAM 6116, didn't have
-one! This was mainly added for the Heathkit:**
+array completely and use 74F373 instead of 74LS373.**
 
 ![MPF Resistor](pics/mpf-resistor.jpg)
 
