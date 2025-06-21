@@ -425,6 +425,8 @@ The machine type string (1st line in the `ULTIMATE.INI`) is
 
 ![Ultimate MPF](pics/ultimate-mpf.jpg)
 
+![Ultimate MPG 2](pics/mpf.jpg)
+
 The jumper settings are: 
 
 | JP1 | JP2 | JP3 | JP4 | JP5 | JP6 | JP7 | JP8 | JP9 | A9 | A10 | 
@@ -442,6 +444,16 @@ The `HALT` pin of the `J3` header needs to be connected to **pin 37**
 on the MPF's (1, 1B, 1P) primary (top-left) extension header via a
 jumper wire.  Double check `JP1` as well; for the Microprofessor, it
 needs to be set to R (for `CE`, pin 18).
+
+I also recommend to add an additional decoupling capacitor (104, 0.1
+uF / 100 nF) between GND and VCC of the 6116 socket to help with
+noise:
+
+![MPF Capacitor](pics/mpf-capacitor.jpg)
+
+**If you encounter stability problems, try removing the 10k resistors
+array altogether.** 
+
 
 Also have a look at [the predecessor project, PicoRAM 6116.](https://github.com/lambdamikel/picoram6116)
 
