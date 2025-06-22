@@ -21,7 +21,7 @@
 //
 //
 
-#define VERSION " v1.1 (C) 2025 "
+#define VERSION " v1.2 (C) 2025 "
 
 //
 // Supported Machines
@@ -2245,7 +2245,7 @@ void main_labvolt(void) {
         gpio_put(SEL2, 0);
         
         __asm volatile (" nop\n nop\n nop\n nop\n");
-        __asm volatile (" nop\n nop\n nop\n");
+        __asm volatile (" nop\n nop\n nop\n nop\n");
         
         high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) & 0b011111) << 6; // A6 - A10
         
@@ -2263,7 +2263,7 @@ void main_labvolt(void) {
         gpio_put(SEL2, 0);
         
         __asm volatile (" nop\n nop\n nop\n nop\n");
-        __asm volatile (" nop\n nop\n nop\n");
+        __asm volatile (" nop\n nop\n nop\n nop\n");
         
         high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) & 0b011111) << 6; // A6 - A10
         
@@ -2506,7 +2506,12 @@ int main() {
   if (MACHINE_T == LABVOLT) {
     for (gpio = ADR_INPUTS_START; gpio < DATA_GPIO_START; gpio++) {
       gpio_set_input_hysteresis_enabled(gpio, false);
-    }
+    } 
+   
+    for (gpio = DATA_GPIO_START; gpio < DATA_GPIO_END; gpio++) {
+      gpio_set_drive_strength(gpio, GPIO_DRIVE_STRENGTH_12MA);
+      gpio_set_slew_rate(gpio, GPIO_SLEW_RATE_FAST); 
+    } 
   }
 
   //
