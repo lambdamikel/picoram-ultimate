@@ -1,0 +1,199 @@
+; Source: https://rosettacode.org/wiki/Towers_of_Hanoi
+; modified by Michael Wessel aka LambdaMikel 6/23/2025 for Lab-Volt 6502 trainer 
+
+temp   = $FB   
+discno = $FA ; added by MW to diplay disc number for move disc output
+
+; Lab-Volt 6502 CPU trainer firmware routines 
+
+WRTOPN = $f1df 
+READ   = $f168
+READC2 = $f198
+INTPNT = $f179
+SCNGET = $f13c
+OUTBYT = $f3ac
+SCAN   = $f022
+GETKEY = $f090
+
+
+; Main Towers of Hanoi routine. To call, load the accumulator with the number of disks to move,
+; the X register with the source peg (1-3), and the Y register with the target peg.
+
+org $0200
+
+start:   jsr ask    ; ask for number of discs; don't have to use monitor to set A register
+
+         ldx #$0a   ; added by MW; don't have to use monitor to set X, Y registers, and use HEX
+         ldy #$0c   ; dito 
+         
+         jsr hanoi  ; start main program 
+         
+         ldx #$c5   ; returned, diplay dashes and wait for keypress to end 
+         jsr wrtopn
+         jsr wrtopn
+         jsr wrtopn
+         jsr read
+         
+         jmp start  
+
+hanoi:   cmp #$00       ; do nothing if the number of disks to move is zero
+         bne nonzero
+         rts
+
+nonzero: 
+
+         pha            ; save registers on stack
+         txa
+         pha
+         tya
+         pha
+         pha            ; and make room for the spare peg number
+
+         ; Parameters are now on the stack at these offsets:
+         count  = $0104
+         source = $0103
+         target = $0102
+         spare  = $0101
+
+         ; compute spare rod number (6 - source - dest)
+         ; compute spare rod number (33 - source - dest)
+         tsx
+         ;; lda #6
+         lda #33 
+         sec
+         sbc source, x
+         sec
+         sbc target, x
+         sta spare, x
+
+         ; prepare for first recursive call
+         tay                ; target is the spare peg
+         tsx
+         lda source, x      ; source is the same
+         sta temp           ; we're using X to access the stack, so save its value here for now
+
+         lda count, x       ; move count - 1 disks
+         sec
+         sbc #1
+         ldx temp           ; now load X for call 
+
+         ; and recurse
+         jsr hanoi
+
+         ; restore X and Y for print call
+         tsx
+         lda count, x ; added by MW
+         sta discno   ; added by MW
+         ldy target, x
+         lda source, x
+         tax
+         
+         
+         ; print instructions to move the last disk
+         jsr print_move
+
+         ; prepare for final recursive call
+         tsx
+         lda spare, x    ; source is now spare
+         sta temp
+         lda target, x   ; going to the original target
+         tay            
+         lda count, x    ; and again moving count-1 disks
+         sec         
+         sbc #1
+         ldx temp
+         jsr hanoi
+
+         ; pop our stack frame, restore registers, and return
+         pla
+         pla
+         tay
+         pla
+         tax
+         pla
+         rts
+
+
+; print instructions: move disk from (X) to (Y)
+print_move:
+
+         txa ; x to stack 
+         pha
+         tya ; y to stack 
+         pha
+         
+         pha ; push a
+       
+         ; Parameters are now on the stack at these offsets:
+ 
+         from   = $0103
+           to   = $0102
+           
+         lda #$c3
+         jsr intpnt+2
+         tsx
+         lda from,x
+         jsr readc2
+         
+         lda #$c1 
+         jsr intpnt+2 
+         tsx
+         lda to,x
+         jsr readc2
+         
+         lda #$c5
+         jsr intpnt+2 
+         lda discno 
+         jsr readc2
+      
+         jsr delay
+         
+         pla   
+         tay
+         pla    
+         tax
+         
+         pla 
+         
+         rts
+
+delay: 
+
+    ldx #$40
+    
+wait:
+
+    txa ; x to stack 
+    pha
+         
+    jsr scan
+    
+    pla    ; restore x 
+    tax
+    
+    dex
+    bne wait
+    
+    rts
+    
+ask:
+
+    lda #$c5
+    jsr intpnt+2 
+    lda #$d1
+    jsr readc2
+    
+    lda #$c3
+    jsr intpnt+2 
+    lda #$5c 
+    jsr readc2
+    
+    jsr read
+    
+    rts
+    
+    
+    
+
+
+         
