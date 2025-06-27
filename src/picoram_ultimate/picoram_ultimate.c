@@ -21,7 +21,7 @@
 //
 //
 
-#define VERSION " v1.2 (C) 2025 "
+#define VERSION " v1.3 (C) 2025 "
 
 //
 // Supported Machines
@@ -2331,7 +2331,6 @@ void main_mpf(void) {
       if (! read && ! gpio_get(WE_INPUT)) {
 	gpio_set_dir_masked(data_mask, 0);
 	// wait until address is stable! ~80 ns or so...
-	//__asm volatile (" nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n");
 	__asm volatile (" nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n");
 	r_op = (gpio_get_all() & data_mask) >> DATA_GPIO_START ;
 	ram[cur_bank][m_adr] = r_op;
@@ -2349,6 +2348,67 @@ void main_mpf(void) {
   }
 
 }
+
+
+void main_et3400_exp(void) {
+
+  read = false; 
+  written = false; 
+  confirmed = false; 
+
+  gpio_set_dir_masked(data_mask, 0);
+  reset_release();   
+
+  while (true) {   
+    
+    if (disabled ) {
+      gpio_put(LED_PIN, 1);
+      confirmed = true;
+      while (disabled ) {}; 
+    }
+
+    while ( gpio_get(CE_INPUT) && ! disabled ) { // 135 ns (11000.... high clock!)    
+    
+      gpio_put(SEL1, 0);
+      low_adr = ((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) & 0b111111; // A0 - A5
+      gpio_put(SEL1, 1);
+    
+      gpio_put(SEL2, 0);
+      high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) & 0b011111) << 6; // A6 - A10
+      gpio_put(SEL2, 1);
+
+      m_adr = low_adr | high_adr;
+
+    }
+
+    //
+    //
+    //
+
+    read = false; 
+    written = false; 
+
+    while ( ! gpio_get(CE_INPUT) && ! disabled ) { 
+
+      if (! read && ! gpio_get(WE_INPUT)) {
+	gpio_set_dir_masked(data_mask, 0);
+	r_op = (gpio_get_all() & data_mask) >> DATA_GPIO_START ;
+	ram[cur_bank][m_adr] = r_op;
+	read = true;  
+      } else if (! written) {
+	w_op = ram[cur_bank][m_adr];   
+	gpio_set_dir_masked(data_mask, data_mask);	
+	gpio_put_masked(data_mask, (w_op << DATA_GPIO_START));
+	written = true;
+      }
+    }
+    
+    gpio_set_dir_masked(data_mask, 0);
+
+  }
+
+}
+
 
 //
 //
@@ -2503,7 +2563,7 @@ int main() {
   //
   //
 
-  if (MACHINE_T == LABVOLT) {
+  if (MACHINE_T == LABVOLT ) {
     for (gpio = ADR_INPUTS_START; gpio < DATA_GPIO_START; gpio++) {
       gpio_set_input_hysteresis_enabled(gpio, false);
     } 
@@ -2521,7 +2581,7 @@ int main() {
   switch (MACHINE_T) {
   case UNKNOWN : show_error_and_halt("BAD CONFIG!"); break;
   case ET3400 : main_et3400(); break; // for Heathkit Stock 4x 2112 
-  case ET3400_EXP : main_mpf(); break; // for Heathkit Expansion Header
+  case ET3400_EXP : main_et3400_exp(); break; // for Heathkit Expansion Header
   case LABVOLT : main_labvolt(); break; 
   case MC6400 : main_mc6400(); break; 
   case MPF : main_mpf(); break; 
@@ -2529,3 +2589,4 @@ int main() {
   }
 
 } 
+
