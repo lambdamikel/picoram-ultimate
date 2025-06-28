@@ -1,3 +1,6 @@
+;; Towers of Hanoi for the Heathkit ET-3400 @ 0x0100h
+;; Written 6-28-2025 by Michael Wessel aka LambdaMikel
+
 ; ===== Monitor ROM routines =====
 
 RESET  = $fc00
