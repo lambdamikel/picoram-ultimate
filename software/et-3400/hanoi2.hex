@@ -1,0 +1,27 @@
+Instructions:
+
+Tower of Hanoi HEX codes - automatic version. Start with "GO0100",
+"disc" shows, push HEX key 1 to F for number of discs. Automatic 
+version, change delay constant at 016A:60 for slower / faster display.
+
+Use AUTO0100 to enter program from address 0x0100h:
+
+BD018636860A36860B36860C3630A603
+9700A6029701A6009702BD0126BD0197
+BDFDF47E010030A605810026013930A6
+054A36A60436A60236A60336BD012632
+32323230A6059700A6049701A6029702
+BD017030A6054A36A60336A60436A602
+36BD01263232323239CE60000926FD39
+BDFCBC9600BDFE209601BDFE209602BD
+FE20BD016939BDFCBC86D1BDFE20865C
+BDFE20BDFDF439BDFD8D080808080888
+39
+
+Written by Michael Wessel aka LambdaMikel 06-27-2026
+
+Video:
+https://youtu.be/XyA8ZDM9Fl0
+
+PicoRAM Ultimate:
+https://github.com/lambdamikel/picoram-ultimate
