@@ -11,7 +11,7 @@
 ; which is expected in HL), and _putc: Print a single character which is 
 ; expected in A. RST 0 give control back to the monitor.
 ;
-        org     $1800
+        org     $7000
 
 vdp      	equ 	$00f0
 hex7seg		equ 	$0678
@@ -460,7 +460,7 @@ dispdelay:
 ;;;
 ;;; 
 
-	org $2000 
+	org $1800 
 	
 iteration_max   defb    10                      ; How many iterations
 x               defw    0                       ; x-coordinate

@@ -460,8 +460,6 @@ dispdelay:
 ;;;
 ;;; 
 
-	org $2000 
-	
 iteration_max   defb    10                      ; How many iterations
 x               defw    0                       ; x-coordinate
 x_start         defw    -2 * scale              ; Minimum x-coordinate

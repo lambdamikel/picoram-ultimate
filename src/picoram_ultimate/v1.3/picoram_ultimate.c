@@ -21,7 +21,7 @@
 //
 //
 
-#define VERSION "v1.4 07-21-2025"
+#define VERSION " v1.3 (C) 2025 "
 
 //
 // Supported Machines
@@ -2008,7 +2008,7 @@ void show_logo(void) {
   print_string(0,0,"   * PicoRAM *  "); 
   print_string(0,1,"    Ultimate    "); 
   print_string(0,2, VERSION);
-  print_string(0,3,"(C) LambdaMikel");
+  print_string(0,3,"2025 LambdaMikel");
   
     
 }
@@ -2330,22 +2330,20 @@ void main_mpf(void) {
 
       if (! read && ! gpio_get(WE_INPUT)) {
 	gpio_set_dir_masked(data_mask, 0);
-	__asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n"); 
-  
+	// wait until address is stable! ~80 ns or so...
+	__asm volatile (" nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n nop\n");
 	r_op = (gpio_get_all() & data_mask) >> DATA_GPIO_START ;
 	ram[cur_bank][m_adr] = r_op;
-	read = true;   
+	read = true;  
       } else if (! written) {
 	w_op = ram[cur_bank][m_adr];   
 	gpio_set_dir_masked(data_mask, data_mask);	
-  
 	gpio_put_masked(data_mask, (w_op << DATA_GPIO_START));
 	written = true;
       }
     }
-     
-    if (written)
-      gpio_set_dir_masked(data_mask, 0);
+    
+    gpio_set_dir_masked(data_mask, 0);
 
   }
 
