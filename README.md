@@ -45,7 +45,7 @@ currently suported machines (with the exception of the MPF-1P):
 
 ### January 2026
 
-- ROM emulation for the Heathkit ET-3400 machines over IO expansion
+- ROM emulation for the Heathkit ET-3400(A) machines over IO expansion
   header is supported by now - thanks to Peter K. for suggesting
   this. This is a useful feature in case you planning on developing you
   own monitor program, or changing / extending the standard
@@ -206,6 +206,8 @@ jumper settings can be found on the PCB as well:
 
 - SD card: loading and saving of programs (full SRAM memory dumps) and
   easy file exchange with the PC (FAT32 filesystem). ASCII HEX format.
+
+- Heathkit ET-3400(A) ROM emulation. 
 
 - Comfortable UI: 5 buttons and an OLED display.
 
@@ -472,17 +474,17 @@ RAM_SELECT = A11 & A12 & A13 & A14 & A15 ;
 ```
 
 (`RAM_SELECT` is really a `ROM_SELECT` then). The ROM-decoder GAL
-files are availalable [here.](src/et3400_decoder_0xf800/):
+files are availalable [here.](src/et3400_decoder_0xf800/)
 
 ![PicoROM](pics/picoram-rom.png)
 
 Load [the ET3400 Monitor ROM](software/et-3400/ROM3400.RAM); at
 `0xf800`, you will find my *Towers of Hanoi* program, and the 1 KB
 monitor ROM (`CPU UP`) starts at `0xfc00`. Note that the ROM memory is
-write-protected; hence, you cannot change it. Use the standard RAM
-(`0x0000 - 0x01ff`) for writeable memory; however, you can still use
-the ROM region from `0xf800 - 0xfbff` for your own (ROM) program (like
-the Towers of Hanoi here).
+write-protected; hence, you cannot change it with the monitor. Use the
+standard RAM (`0x0000 - 0x01ff`) for writeable memory; however, you
+can still use the ROM region from `0xf800 - 0xfbff` for your own (ROM)
+program (like the Towers of Hanoi here).
 
 Originally, PicoRAM Ultimate was designed in such a way that **JP9
 could be used in left jumper position** to route the GAL-generated RE
