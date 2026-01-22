@@ -23,6 +23,7 @@ Currently supported SBCs / host machines are:
 - Multitech Microprofessor MPF-1, MPF-1B and MPF-1P: Z80 CPU, 1x 6116, 2 KBs  
 - Lab-Volt 6502: 6502 CPU, 2x 2114, 1 KB
 - Philips MC6400 MasterLab: INS8070 SC/MP III CPU, 2x 2114, 1 KB
+- Heathkit ET-3400 & ET-3400A ROM emulation: using the expansion header, and having the GAL map into the `0xF800` to `0xFFFF` address range, we can use PicoROM as a ROM emulator. 
 
 The [development
 logs](https://hackaday.io/project/194092-picoram-6116-sram-emulator-sd-card-interface)
@@ -44,7 +45,23 @@ currently suported machines (with the exception of the MPF-1P):
 
 ### January 2026
 
-- The Heathkit ET-3400A with expansion header is supported by now - firmware version 1.7 has been uploaded. This gives you 2 KBs of RAM.
+- ROM emulation for the Heathkit ET-3400 machines over IO expansion
+  header is supported by now - thanks to Peter K. for suggesting
+  this. This is a useful feature in case you plan on developing you
+  own monitor program, or changing / extending the standard
+  monitor. Firmware version 1.8 supports this; note that emulated ROM
+  is write protected, and you will still need the original SRAM chips
+  installed as well. However, the (EP | P)ROM chip needs to be pulled,
+  and a [different GAL address](src/et3400_decoder_0xf800/) must be
+  used to map into the ROM memory region `0xfc00 - 0xffff`. The
+  monitor RAM files for the SD card are available as well
+  ([here](software/et-3400/ROM3400.RAM) and
+  [here](software/et-3400a/ROM3400A.RAM).
+
+![PicoRAM ROM Emulation)](pics/picoram-rom.png)
+
+- The Heathkit ET-3400A with expansion header is supported by now -
+  firmware version 1.7 has been uploaded. This gives you 2 KBs of RAM.
 
 ![ET-3400A a)](pics/ultimate-heathkit-a-exp1.JPG)
 
@@ -316,7 +333,9 @@ more detail below.
 - `HEATHKIT`: stock Heathkit ET-3400. PicoRAM plugs into the `IC14` and `IC17` 2112 SRAM sockets and provides 512 bytes or 1 KB of SRAM (configurable).
 - `ET-3400A`: stock Heathkit ET-3400A. PicoRAM plugs into the `U14` and `U15` 2114 SRAM sockets and provides 512 Bytes of SRAM (*not* 1 KB, see below for an explanation).
 - `HEATHKIT+`: Heathkit ET-3400 with extension header. PicoRAM plugs onto the extension header and provides 2 KBs of SRAM. This required an additional address decoder (a GAL16V8). See below for details.
-- `HEATHKITA+`: Heathkit ET-3400A with extension header. PicoRAM plugs onto the extension header and provides 2 KBs of SRAM. This required an additional address decoder (a GAL16V8). See below for details. 
+- `HEATHKIT+ROM`: Heathkit ET-3400 with extension header, ROM emulation mode. Requires installed SRAMs (2 or 4 2112s), the PROM chip (IC12) pulled, and [this](src/et3400_decoder_0xf800/) address decoder. Load [the ET3400 ROM](software/et-3400/ROM3400.RAM); at `0xf800`, you will find my *Towers of Hanoi* program, and the 1 KB monitor ROM (`CPU UP`) starts at `0xfc00`. 
+- `HEATHKITA+`: Heathkit ET-3400A with extension header. PicoRAM plugs onto the extension header and provides 2 KBs of SRAM. This required an additional address decoder (a GAL16V8). See below for details.
+- `HEATHKITA+ROM`: Heathkit ET-3400A with extension header, ROM emulation mode. Requires installed SRAMs (2 2114s), the (E)PROM chip (U12) pulled, and [this](src/et3400_decoder_0xf800/) address decoder. Load [the ET3400A ROM](software/et-3400a/ROM3400A.RAM); at `0xf800`, you will find my *Towers of Hanoi* program, and the 1 KB monitor ROM (`CPU UP`) starts at `0xfc00`. 
 - `LABVOLT`: Lab-Volt 6502 trainer. PicoRAM plugs into the `RAM (D0-D3)` and `RAM (D4-D7)` 2114 sockets and provides 1 KB of SRAM. 
 - `MASTERLAB`: Philips MC6400 MasterLab. PicoRAM plugs into the 2 2114 SRAM sockets and provides 1 KB of SRAM. 
 - `MPF`: Multitech Microprofessor MPF-1, MPF-1B, MPF-1P. PicoRAM plugs into the `U8` 6116 socket on the MPF-1(B), or the
@@ -425,10 +444,43 @@ I installed the mod. Please read further.**
 For this mode, the 16V8 GAL chip `U10` **must** be installed, as the
 RAM select signal can not longer be generated from the SRAM sockets,
 due to the larger address range. Here are [the (optional) GAL
-source](src/et3400_decoder/etgal.PLD) and [the required JED firmware
-file](firmware/v1.0/et3400_decoder_16v8_gal.jed) (i.e., for
+source](src/et3400_decoder_0x0000/ETGAL.PLD) and [the required JED
+firmware file](src/et3400_decoder_0x0000/ETGAL.jed) (i.e., for
 programming a 16V8 GAL with a standard TL-866 EPROM programmer and
-MiniPro).
+MiniPro). The standard decoder decodes the memory region `0x0000` to
+`0x07ff`; you will hence need to remove the SRAM chips.
+
+However, it also possible to change the address decoder - by changing the
+GAL select equation
+
+```
+RAM_SELECT = ! A11 & ! A12 & ! A13 & ! A14 & ! A15 ;
+```
+
+we can decode any address region in 2 KB pages (note that `A0` to
+`A10` = 11 address bits = 2048 bytes = 2 KBs).
+
+**To use PicoRAM as a PicoROM,** we can simple pull the (P)ROM / EPROM
+chip, and change the decoder such that it covers the ROM address range
+`0xFC00 - 0xFFFF`. Due to the minimal 2 KB page size, this range would
+be `0xF800 - 0xFFF`:
+
+```
+RAM_SELECT = A11 & A12 & A13 & A14 & A15 ;
+```
+
+(`RAM_SELECT` is really a `ROM_SELECT` then). The ROM-decoder GAL
+files are availalable [here.](src/et3400_decoder_0xf800/):
+
+![PicoROM](pics/picoram-rom.png)
+
+Load [the ET3400 Monitor ROM](software/et-3400/ROM3400.RAM); at
+`0xf800`, you will find my *Towers of Hanoi* program, and the 1 KB
+monitor ROM (`CPU UP`) starts at `0xfc00`. Note that the ROM memory is
+write-protected; hence, you cannot change it. Use the standard RAM
+(`0x0000 - 0x01ff`) for writeable memory; however, you can still use
+the ROM region from `0xf800 - 0xfbff` for your own (ROM) program (like
+the Towers of Hanoi here).
 
 Originally, PicoRAM Ultimate was designed in such a way that **JP9
 could be used in left jumper position** to route the GAL-generated RE
@@ -475,6 +527,17 @@ The machine type string (1st line in the `ULTIMATE.INI`) is
 The same notes as for the ET-3400 and the expansion header apply.
 Note that the ET-3400A already has the RE and Phi2 wires
 pre-installed, but the databus cables need to be soldered in as well. 
+
+For ROM emulation, use [the ROM decoder GAL
+files.](src/et3400_decoder_0xf800/), and leave the SRAM chips (2x
+2114) installed. Load [the ET3400A Monitor
+ROM](software/et-3400a/ROM3400A.RAM); at `0xf800`, you will find my
+*Towers of Hanoi* program, and the 1 KB monitor ROM (`CPU UP`) starts
+at `0xfc00`. Note that the ROM memory is write-protected; hence, you
+cannot change it with the monitor. Use the standard RAM (`0x0000 -
+0x01ff`) for writeable memory; however, you can still use the ROM
+region from `0xf800 - 0xfbff` for your own (ROM) program (like the
+Towers of Hanoi here).
 
 The same configuration as for the ET-3400 with expansion header
 applies: 

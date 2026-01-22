@@ -21,7 +21,7 @@
 //
 //
 
-#define VERSION "v1.8 01-21-2026"
+#define VERSION "v1.7 01-17-2026"
 
 //
 // Supported Machines
@@ -31,10 +31,8 @@ typedef enum {
   UNKNOWN, 
   ET3400,
   ET3400_EXP,
-  ET3400_EXP_ROM, 
   ET3400A, 
   ET3400A_EXP, 
-  ET3400A_EXP_ROM, 
   LABVOLT,
   MC6400, 
   MPF
@@ -1348,19 +1346,13 @@ int sd_read_init() {
     print_line(0, MACHINE); 
     sleep_ms(DISPLAY_DELAY_LONG);
 
-    if (prefix("HEATHKIT+ROM", MACHINE)) {
-      strcpy(MACHINE, "3400 XROM      "); 
-      MACHINE_T = ET3400_EXP_ROM;
-    } else if (prefix("HEATHKIT+", MACHINE)) {
+    if (prefix("HEATHKIT+", MACHINE)) {
       strcpy(MACHINE, "ET-3400 EXPANDED"); 
       MACHINE_T = ET3400_EXP;
-    } else if (prefix("HEATHKITA+ROM", MACHINE)) {
-      strcpy(MACHINE, "3400A XROM     "); 
-      MACHINE_T = ET3400A_EXP_ROM;
     } else if (prefix("HEATHKITA+", MACHINE)) {
       strcpy(MACHINE, "ET-3400A EXPANDED"); 
       MACHINE_T = ET3400A_EXP;
-    } else if (prefix("ET-3400A", MACHINE)) {
+    }else if (prefix("ET-3400A", MACHINE)) {
       strcpy(MACHINE, "ET-3400 A      "); 
       MACHINE_T = ET3400A;
     } else if (prefix("HEATHKIT", MACHINE)) {
@@ -2570,51 +2562,6 @@ void main_et3400_exp(void) {
 
 }
 
-void main_et3400_exp_rom(void) {
-
-  read = false; 
-  written = false; 
-  confirmed = false; 
-
-  gpio_set_dir_masked(data_mask, 0);
-  gpio_put(SEL1, 0);
-  gpio_put(SEL2, 1);
-
-  reset_release();   
- 
-  while (true) {   
-
-    if ( ! gpio_get(CE_INPUT) ) { 
-
-      gpio_put(SEL1, 1);
-      gpio_put(SEL2, 0);
-
-      __asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n");
-      __asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
-      high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
-      low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5 */ 
-      m_adr = ( low_adr | high_adr ) & 0b011111111111;
-	                  
-      w_op = ram[cur_bank][m_adr]; 
-      gpio_set_dir_masked(data_mask, data_mask);
-      gpio_put_masked(data_mask, w_op << DATA_GPIO_START);
-
-      while ( ! gpio_get(CE_INPUT) ) {__asm volatile(" nop\n\n");  }; 
-      
-      gpio_put(SEL1, 0);
-      gpio_put(SEL2, 1);
-      gpio_set_dir_masked(data_mask, 0);
-     
-    } else {
-
-      // low_adr = ((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) & 0b111111; // A0 - A5
-      low_adr = gpio_get_all(); 
-    
-    }
-  }
-
-}
-
 
 void main_et3400a(void) {
 
@@ -2677,6 +2624,7 @@ void main_et3400a(void) {
 
 }
 
+
 void main_et3400a_exp(void) {
 
   read = false; 
@@ -2700,7 +2648,7 @@ void main_et3400a_exp(void) {
 
 	__asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
 	high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
-	low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5 
+	low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5 */ 
 	m_adr = ( low_adr | high_adr ) & 0b011111111111;
 	
                   
@@ -2713,7 +2661,7 @@ void main_et3400a_exp(void) {
 
 	__asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
 	high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
-	low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5  
+	low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5 */ 
 	m_adr = ( low_adr | high_adr ) & 0b011111111111; 
 
       
@@ -2738,49 +2686,6 @@ void main_et3400a_exp(void) {
 
 }
 
-void main_et3400a_exp_rom(void) {
-
-  read = false; 
-  written = false; 
-  confirmed = false; 
-
-  gpio_set_dir_masked(data_mask, 0);
-  gpio_put(SEL1, 0);
-  gpio_put(SEL2, 1);
-
-  reset_release();   
- 
-  while (true) {   
-
-    if ( ! gpio_get(CE_INPUT) ) { 
-
-      gpio_put(SEL1, 1);
-      gpio_put(SEL2, 0);
-
-      __asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
-      high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
-      low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5 */ 
-      m_adr = ( low_adr | high_adr ) & 0b011111111111;
-	                  
-      w_op = ram[cur_bank][m_adr]; 
-      gpio_set_dir_masked(data_mask, data_mask);
-      gpio_put_masked(data_mask, w_op << DATA_GPIO_START);
-
-      while ( ! gpio_get(CE_INPUT) ) {__asm volatile(" nop\n\n");  }; 
-      
-      gpio_put(SEL1, 0);
-      gpio_put(SEL2, 1);
-      gpio_set_dir_masked(data_mask, 0);
-     
-    } else {
-
-      // low_adr = ((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) & 0b111111; // A0 - A5
-      low_adr = gpio_get_all(); 
-    
-    }
-  }
-
-}
 
 void main_mpf(void) {
 
@@ -3074,12 +2979,10 @@ int main() {
   switch (MACHINE_T) {
     
   case ET3400 :
-  case ET3400_EXP :
-  case ET3400_EXP_ROM : multicore_launch_core1(display_loop_et3400); break;
+  case ET3400_EXP : multicore_launch_core1(display_loop_et3400); break;
     
   case ET3400A : 
-  case ET3400A_EXP :
-  case ET3400A_EXP_ROM : multicore_launch_core1(display_loop_et3400a); break;
+  case ET3400A_EXP : multicore_launch_core1(display_loop_et3400a); break;
     
   case MPF : multicore_launch_core1(display_loop_et3400); break;
   
@@ -3112,11 +3015,9 @@ int main() {
 
   case ET3400 : main_et3400(); break; // for Stock Heathkit ET-3400 4x 2112, 512 bytes 
   case ET3400_EXP : main_et3400_exp(); break; // for Stock Heathkit with Expansion Header, 2 KBs 
-  case ET3400_EXP_ROM : main_et3400_exp_rom(); break; // for Stock Heathkit with Expansion Header, 2 KBs, ROM EMULATION MODE 
 
   case ET3400A : main_et3400a(); break; // for Stock Heathkit ET-3400A 2x 2114, but 512 bytes only! 
   case ET3400A_EXP : main_et3400a_exp(); break; // for Stock Heathkit ET-3400A with Expansion Header, 2 KBs 
-  case ET3400A_EXP_ROM : main_et3400a_exp_rom(); break; // for Stock Heathkit ET-3400A with Expansion Header, 2 KBs, ROM EMULATION MODE 
 
   case LABVOLT : main_labvolt(); break; 
 

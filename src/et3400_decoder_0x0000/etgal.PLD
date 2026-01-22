@@ -26,7 +26,7 @@ PIN 15 = RE ;
 
 PIN 12 = SE ; 
 
-RAM_SELECT = !A11 & !A12 & !A13 & !A14 & !A15 ;
+RAM_SELECT = ! A11 & ! A12 & ! A13 & ! A14 & ! A15 ;
 
 ACCESS = ! VMA & RAM_SELECT ; 
 
