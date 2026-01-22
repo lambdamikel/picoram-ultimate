@@ -47,64 +47,64 @@ currently suported machines (with the exception of the MPF-1P):
 
 - ROM emulation for the Heathkit ET-3400 machines over IO expansion
   header is supported by now - thanks to Peter K. for suggesting
-  this. This is a useful feature in case you plan on developing you
+  this. This is a useful feature in case you planning on developing you
   own monitor program, or changing / extending the standard
   monitor. Firmware version 1.8 supports this; note that emulated ROM
   is write protected, and you will still need the original SRAM chips
   installed as well. However, the (EP | P)ROM chip needs to be pulled,
-  and a [different GAL address](src/et3400_decoder_0xf800/) must be
+  and a [different GAL address decoder](src/et3400_decoder_0xf800/) must be
   used to map into the ROM memory region `0xfc00 - 0xffff`. The
   monitor RAM files for the SD card are available as well
   ([here](software/et-3400/ROM3400.RAM) and
   [here](software/et-3400a/ROM3400A.RAM)).
 
-![PicoRAM ROM Emulation)](pics/picoram-rom.png)
+  ![PicoRAM ROM Emulation)](pics/picoram-rom.png)
 
   Here is [a YT video.](https://youtu.be/Iy9S-a9cPTU)
 
 - The Heathkit ET-3400A with expansion header is supported by now -
   firmware version 1.7 has been uploaded. This gives you 2 KBs of RAM.
 
-![ET-3400A a)](pics/ultimate-heathkit-a-exp1.JPG)
+  ![ET-3400A a)](pics/ultimate-heathkit-a-exp1.JPG)
 
-Here is [a YT video.](https://youtu.be/NRePFKi3Nig)
+  Here is [a YT video.](https://youtu.be/NRePFKi3Nig)
 
 - The stock Heathkit ET-3400A is supported by now - firmware version 1.6 
 has been uploaded. 
 
-![ET-3400A a)](pics/ultimate-heathkit-a-1.JPG)
+  ![ET-3400A a)](pics/ultimate-heathkit-a-1.JPG)
 
-Here is [a YT video.](https://youtu.be/SLuOrD5KGnc)
+  Here is [a YT video.](https://youtu.be/SLuOrD5KGnc)
 
 - **Unfortunately, the current version of PicoRAM Ultimate has a PCB bug: 
 the position of the RE signal on the header is incorrect. Apologies
 for that.**
 
-You can see that in the schematics here:
+  You can see that in the schematics here:
 
-![Wrong RE Signal](pics/wrong-header.png)
+  ![Wrong RE Signal](pics/wrong-header.png)
 
-When I wired up the IO header on my ET-3400, I flipped left and right
-and put it on pins 30 and 29 instead of 12 and 11, where they should
-have been.
+  When I wired up the IO header on my ET-3400, I flipped left and right
+  and put it on pins 30 and 29 instead of 12 and 11, where they should
+  have been.
 
-I only noticed now, with my new ET-3400A, which already came with the
-RE signal wired up on the IO header (I only had to install the data
-lines), that the position didn't match. And indeed, the ET-3400A
-schematics lists the RE pin positions as follows - you see the difference:
+  I only noticed now, with my new ET-3400A, which already came with the
+  RE signal wired up on the IO header (I only had to install the data
+  lines), that the position didn't match. And indeed, the ET-3400A
+  schematics lists the RE pin positions as follows - you see the difference:
 
-![Correct RE Signal](pics/et3400a-header.png)
+  ![Correct RE Signal](pics/et3400a-header.png)
 
-There is an easy fix for this - don't use JP9, but a DuPont wire that
-runs directly into the breadboard RE signal, as shown in these
-pictures:
+  There is an easy fix for this - don't use JP9, but a DuPont wire that
+  runs directly into the breadboard RE signal, as shown in these
+  pictures:
 
-![RE Fix 1](pics/picoram-re-bug-1.jpg)
+  ![RE Fix 1](pics/picoram-re-bug-1.jpg)
 
-![RE Fix 2](pics/picoram-re-bug-2.jpg)
+  ![RE Fix 2](pics/picoram-re-bug-2.jpg)
 
-Eventually, I will create a new PCB version with this bug fix. But for
-now, the workaround is sufficient. 
+  Eventually, I will create a new PCB version with this bug fix. But for
+  now, the workaround is sufficient. 
 
 
 ### October 2025
