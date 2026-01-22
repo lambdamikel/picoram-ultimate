@@ -47,12 +47,13 @@ currently suported machines (with the exception of the MPF-1P):
 
 - ROM emulation for the Heathkit ET-3400(A) machines over IO expansion
   header is supported by now - thanks to Peter K. for suggesting
-  this. This is a useful feature in case you planning on developing you
-  own monitor program, or changing / extending the standard
-  monitor. Firmware version 1.8 supports this; note that emulated ROM
-  is write protected, and you will still need the original SRAM chips
-  installed as well. However, the (EP | P)ROM chip needs to be pulled,
-  and a [different GAL address decoder](src/et3400_decoder_0xf800/) must be
+  this. Use firmware version 1.8 for additional ROM emulation. This is
+  a useful feature in case you planning on developing you own monitor
+  program, or changing / extending the standard monitor. Firmware
+  version 1.8 supports this; note that emulated ROM is write
+  protected, and you will still need the original SRAM chips installed
+  as well. However, the (EP | P)ROM chip needs to be pulled, and a
+  [different GAL address decoder](src/et3400_decoder_0xf800/) must be
   used to map into the ROM memory region `0xfc00 - 0xffff`. The
   monitor RAM files for the SD card are available as well
   ([here](software/et-3400/ROM3400.RAM) and
@@ -188,9 +189,9 @@ automatically into the host machine when it powers up (as if these
 were EPROM-based programs).
 
 A number of jumpers must be set to match the host machine. These
-jumper settings can be found on the PCB as well:
-
-![Jumper Settings](pics/jumpers.png)
+jumper settings can be found on the PCB silkscreen as well, although
+incomplete. **It is hence best to refer to this README for the latest
+jumper settings and supported SBCs.**
 
 ## Features 
 
@@ -761,8 +762,8 @@ See [here.](gerbers/gerbers.zip)
 
 ## Firmware Image
 
-The current version is 1.7, January 17th 2026. The `.uf2` image can be
-found [here.](firmware/picoram_ultimate_v1.7.uf2)
+The current version is 1.8, January 21st 2026. The `.uf2` image can be
+found [here.](firmware/picoram_ultimate_v1.8.uf2)
 
 ## Firmware Sources
 
