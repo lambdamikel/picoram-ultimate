@@ -56,9 +56,11 @@ currently suported machines (with the exception of the MPF-1P):
   used to map into the ROM memory region `0xfc00 - 0xffff`. The
   monitor RAM files for the SD card are available as well
   ([here](software/et-3400/ROM3400.RAM) and
-  [here](software/et-3400a/ROM3400A.RAM).
+  [here](software/et-3400a/ROM3400A.RAM)).
 
 ![PicoRAM ROM Emulation)](pics/picoram-rom.png)
+
+  Here is [a YT video.](https://youtu.be/Iy9S-a9cPTU)
 
 - The Heathkit ET-3400A with expansion header is supported by now -
   firmware version 1.7 has been uploaded. This gives you 2 KBs of RAM.
