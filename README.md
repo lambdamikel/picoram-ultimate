@@ -464,16 +464,16 @@ There is [some software for the RAM and ROM configurations; in particular,
 a 2 KB and 4 KB monitor ROM.](software/et-3400/). The
 [2 KB monitor ROM](software/et-3400/rev1/rom-2kb-f800/) also contains
 the Towers of Hanoi starting at `0xf800`; the monitor itself starts at
-`0xfc00`. The [4 KB monitor ROM](software/et-3400/rev1/rom-2kb-f800/)
+`0xfc00`. The [4 KB monitor ROM](software/et-3400/rev2/rom-4kb-f000/)
 (can only be used with PicoRAM Rev. 2) contains the clock at address
-`0xf000` as well. 
+`0xf000` in addition. 
 
 Again, note that the ROM memory is write-protected; hence, you cannot
 change it with the monitor or programmatically. Use the standard RAM
 (`0x0000 - 0x01ff`) for writeable memory in the `3400ROM1` and
 `3400ROM2` configurations. Of course, as demonstrated with the
 ROM-included clock and Hanoi programs, it is possible to have your own
-programs in addition the monitor in the ROM as well. Also note that it
+programs in addition to the monitor. Also note that it
 is not possible to run the monitor program without (at least some)
 RAM.
 
@@ -502,11 +502,11 @@ There is [some software for the RAM and ROM configurations; in
 particular, a 2 KB and 4 KB monitor ROM.](software/et-3400a/). The [2
 KB monitor ROM](software/et-3400a/rev1/rom-2kb-f800/) also contains
 the Towers of Hanoi starting at `0xf800`; the monitor itself starts at
-`0xfc00`. The [4 KB monitor ROM](software/et-3400a/rev1/rom-2kb-f800/)
+`0xfc00`. The [4 KB monitor ROM](software/et-3400a/rev2/rom-4kb-f000/)
 (can only be used with PicoRAM Rev. 2) contains the clock at address
-`0xf000` as well. Note that most programs are identical to the ET-3400
-version; only the clock program is different due to accomodate for the
-different CPU speeds. 
+`0xf000` in addition. Note that most programs are identical to the
+ET-3400 versions; only the clock program is different to accomodate
+the faster CPU clock.
 
 The same configuration as for the ET-3400 with expansion header
 applies: 
