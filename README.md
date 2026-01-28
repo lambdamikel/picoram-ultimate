@@ -387,12 +387,10 @@ expansion header.*
 The machine type string (1st line in the `ULTIMATE.INI`) is
 - ``3400RAM1`` for 2 KBs of RAM in a user-defined range, depending on the address decoder JED file used. For the default range  `0x0000` - `0x07ff`, use [this decoder](src/et3400_decoder_0x0000/rev1) for PicoRAM Ultimate Rev. 1, and
 [this decoder](src/et3400_decoder_0x0000/rev2) for PicoRAM Ultimate Rev. 2. Remove all 2112 SRAM chips for this address range.
-- ``3400RAM2`` for 4 KBs of RAM (PicoRAM Rev. 2 only) in a user-defined range, depending on the address decoder JED file used. For the default range  `0x0000` - `0x0fff`, use [this decoder](src/et3400_decoder_0x0000/rev2). 
-[this decoder](src/et3400_decoder_0x0000/rev2) for PicoRAM Ultimate Rev. 2. Remove all 2112 SRAM chips for this address range.
+- ``3400RAM2`` for 4 KBs of RAM (PicoRAM Rev. 2 only) in a user-defined range, depending on the address decoder JED file used. For the default range  `0x0000` - `0x0fff`, use [this decoder](src/et3400_decoder_0x0000/rev2) for PicoRAM Ultimate Rev. 2. Remove all 2112 SRAM chips for this address range.
 - ``3400ROM1`` for 2 KBs of ROM in a user-defined range, depending on the address decoder JED file used. For the default range  `0xf800` - `0xffff`, use [this decoder](src/et3400_decoder_0xf800/rev1) for PicoRAM Ultimate Rev. 1, and
 [this decoder](src/et3400_decoder_0xf800/rev2) for PicoRAM Ultimate Rev. 2. Remove the (P|EP)ROM chip IC12 for this address range.
-- ``3400ROM2`` for 4 KBs of ROM (PicoRAM Rev. 2 only) in a user-defined range, depending on the address decoder JED file used. For the default range  `0xf000` - `0xffff`, use [this decoder](src/et3400_decoder_0xf800/rev2). 
-[this decoder](src/et3400_decoder_0xf000/rev2) for PicoRAM Ultimate Rev. 2.  Remove the (P|EP)ROM chip IC12 for this address range. 
+- ``3400ROM2`` for 4 KBs of ROM (PicoRAM Rev. 2 only) in a user-defined range, depending on the address decoder JED file used. For the default range  `0xf000` - `0xffff`, use [this decoder](src/et3400_decoder_0xf000/rev2) for PicoRAM Ultimate Rev. 2.  Remove the (P|EP)ROM chip IC12 for this address range. 
 
 PicoRAM plugs onto the expansion header as follows: 
 
@@ -495,12 +493,10 @@ are different - note that the GAL decoders are identical to the ET-3400 versions
 The machine type string (1st line in the `ULTIMATE.INI`) is
 - ``3400ARAM1`` for 2 KBs of RAM in a user-defined range, depending on the address decoder JED file used. For the default range  `0x0000` - `0x07ff`, use [this decoder](src/et3400_decoder_0x0000/rev1) for PicoRAM Ultimate Rev. 1, and
 [this decoder](src/et3400_decoder_0x0000/rev2) for PicoRAM Ultimate Rev. 2. Remove all 2112 SRAM chips for this address range.
-- ``3400ARAM2`` for 4 KBs of RAM (PicoRAM Rev. 2 only) in a user-defined range, depending on the address decoder JED file used. For the default range  `0x0000` - `0x0fff`, use [this decoder](src/et3400_decoder_0x0000/rev2). 
-[this decoder](src/et3400_decoder_0x0000/rev2) for PicoRAM Ultimate Rev. 2. Remove all 2112 SRAM chips for this address range.
+- ``3400ARAM2`` for 4 KBs of RAM (PicoRAM Rev. 2 only) in a user-defined range, depending on the address decoder JED file used. For the default range  `0x0000` - `0x0fff`, use [this decoder](src/et3400_decoder_0x0000/rev2) for PicoRAM Ultimate Rev. 2. Remove all 2112 SRAM chips for this address range.
 - ``3400AROM1`` for 2 KBs of ROM in a user-defined range, depending on the address decoder JED file used. For the default range  `0xf800` - `0xffff`, use [this decoder](src/et3400_decoder_0xf800/rev1) for PicoRAM Ultimate Rev. 1, and
 [this decoder](src/et3400_decoder_0xf800/rev2) for PicoRAM Ultimate Rev. 2. Remove the (P|EP)ROM chip IC12 for this address range.
-- ``3400AROM2`` for 4 KBs of ROM (PicoRAM Rev. 2 only) in a user-defined range, depending on the address decoder JED file used. For the default range  `0xf000` - `0xffff`, use [this decoder](src/et3400_decoder_0xf800/rev2). 
-[this decoder](src/et3400_decoder_0xf000/rev2) for PicoRAM Ultimate Rev. 2.  Remove the (P|EP)ROM chip IC12 for this address range. 
+- ``3400AROM2`` for 4 KBs of ROM (PicoRAM Rev. 2 only) in a user-defined range, depending on the address decoder JED file used. For the default range  `0xf000` - `0xffff`, use [this decoder](src/et3400_decoder_0xf000/rev2) for PicoRAM Ultimate Rev. 2.  Remove the (P|EP)ROM chip IC12 for this address range. 
 
 There is [some software for the RAM and ROM configurations; in
 particular, a 2 KB and 4 KB monitor ROM.](software/et-3400a/). The [2
