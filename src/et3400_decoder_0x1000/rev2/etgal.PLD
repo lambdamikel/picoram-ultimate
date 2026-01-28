@@ -1,0 +1,35 @@
+Name     ETGAL ;
+PartNo   00 ;
+Date     01.24.2026 ;
+Revision 01 ;
+Designer Michael Wessel / LambdaMikel ;
+Company  Home ;
+Assembly None ;
+Location  ;
+Device   G16V8 ; 
+
+PIN  1  = A6 ; 
+PIN  2  = A7 ; 
+PIN  3  = A8 ; 
+PIN  4  = A9 ; 
+PIN  5  = A10 ; 
+PIN  6  = A11 ; 
+PIN  7  = A12 ;
+PIN  8  = A13 ;
+PIN  9  = A14 ; 
+PIN  11 = A15 ; 
+
+PIN 19 = WR ; 
+PIN 18 = VMA ;
+
+PIN 15 = RE ; 
+
+PIN 12 = SE ; 
+
+RAM_SELECT = A12 & ! A13 & ! A14 & ! A15 ;
+
+ACCESS = ! VMA & RAM_SELECT ; 
+
+RE = ! ( ACCESS & WR ) ;
+SE = ACCESS ; 
+ 

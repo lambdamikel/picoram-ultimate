@@ -1,0 +1,25 @@
+# Berkeley PLA format generated using
+#
+# CUPL(WM)        5.0a Serial# 60008009
+# Device          g16v8s  Library DLIB-h-40-9
+# Created         Tue Jan 27 19:42:14 2026
+# Name            ETGAL 
+# Partno          00 
+# Revision        01 
+# Date            01.24.2026 
+# Designer        Michael Wessel / LambdaMikel 
+# Company         Home 
+# Assembly        None 
+# Location        
+#
+# Inputs  A6 A7 A8 A9 
+#         A10 A11 A12 A13 
+#         A14 A15 RE SE 
+#         VMA WR 
+# Outputs !RE SE 
+.i 14
+.o 2
+.p 2
+-----11111--01 1~
+-----11111--0- ~1
+.end

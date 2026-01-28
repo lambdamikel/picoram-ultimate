@@ -21,7 +21,7 @@
 //
 //
 
-#define VERSION "v2.0 01-27-2026"
+#define VERSION "v1.8 01-21-2026"
 
 //
 // Supported Machines
@@ -29,19 +29,12 @@
 
 typedef enum {
   UNKNOWN, 
-
-  ET3400, // Stock 512 Bytes 4x 2112 
-  ET3400_EXP_RAM_V1, // V1 = PicoRAM PCB Rev. 1, 2 KBs 
-  ET3400_EXP_RAM_V2, // V2 = PicoRAM PCB Rev. 2, 4 KBs 
-  ET3400_EXP_ROM_V1, // ROM 2 KBs
-  ET3400_EXP_ROM_V2, // ROM 4 KBs 
-
-  ET3400A, // Stock 512 Bytes 2x 2114
-  ET3400A_EXP_RAM_V1, // V1 = PicoRAM PCB Rev. 1, 2 KBs 
-  ET3400A_EXP_RAM_V2, // V2 = PicoRAM PCB Rev. 2, 4 KBs 
-  ET3400A_EXP_ROM_V1, // ROM 2 KBs
-  ET3400A_EXP_ROM_V2, // ROM 4 KBs 
-
+  ET3400,
+  ET3400_EXP,
+  ET3400_EXP_ROM, 
+  ET3400A, 
+  ET3400A_EXP, 
+  ET3400A_EXP_ROM, 
   LABVOLT,
   MC6400, 
   MPF
@@ -52,7 +45,7 @@ typedef enum {
 // 
 
 #define FILE_LENGTH 20
-#define FILE_BUFF_SIZE 25
+#define FILE_BUFF_SIZE 20
 #define FILE_EXT "*.RAM" 
 
 //
@@ -66,7 +59,7 @@ volatile MACHINE_TYPE MACHINE_T = UNKNOWN;
 volatile bool DEBUG_ADC = false; 
 volatile bool TUNE_ADC = false; 
 
-volatile char MACHINE[FILE_LENGTH] = "UNKNOWN            "; // 19 + 0 
+volatile char MACHINE[FILE_LENGTH] = "UNKNOWN";
 volatile char BANK_PROG[4][FILE_LENGTH]; 
 
 volatile uint16_t CANCEL2_ADC = 0xF00; 
@@ -135,8 +128,8 @@ const uint LED_PIN = PICO_DEFAULT_LED_PIN;
 
 static uint8_t cur_bank = 0; 
 
-uint8_t ram[MAX_BANKS][(uint32_t) 4096] = {};
-uint8_t sdram[(uint32_t) 4096] = {};
+uint8_t ram[MAX_BANKS][(uint32_t) 2048] = {};
+uint8_t sdram[(uint32_t) 2048] = {};
 
 //
 // 
@@ -1355,48 +1348,32 @@ int sd_read_init() {
     print_line(0, MACHINE); 
     sleep_ms(DISPLAY_DELAY_LONG);
 
-    // ET-3400A 
-    if (prefix("3400AROM1", MACHINE)) { // ROM, PCB Version 1, 2 KBs 
-      strcpy(MACHINE, "3400AROM 1         "); 
-      MACHINE_T = ET3400A_EXP_ROM_V1;
-    } else if (prefix("3400AROM2", MACHINE)) { // ROM, PCB Version 2, 4 KBs 
-      strcpy(MACHINE, "3400AROM 2         "); 
-      MACHINE_T = ET3400A_EXP_ROM_V2;
-    } else if (prefix("3400ARAM1", MACHINE)) { // EXP.RAM, PCB Version 1, 2 KBs 
-      strcpy(MACHINE, "3400AEXR 1         "); 
-      MACHINE_T = ET3400A_EXP_RAM_V1; 
-    } else if (prefix("3400ARAM2", MACHINE)) { // EXP.RAM, PCB Version 2, 4 KBs 
-      strcpy(MACHINE, "3400AEXR 2         "); 
-      MACHINE_T = ET3400A_EXP_RAM_V2;
-    } else if (prefix("ET3400A", MACHINE)) { // Stock ET-3400A, 2x 2114, 512 Bytes only (!) 
-      strcpy(MACHINE, "3400A ST           "); 
+    if (prefix("HEATHKIT+ROM", MACHINE)) {
+      strcpy(MACHINE, "3400 XROM      "); 
+      MACHINE_T = ET3400_EXP_ROM;
+    } else if (prefix("HEATHKIT+", MACHINE)) {
+      strcpy(MACHINE, "ET-3400 EXPANDED"); 
+      MACHINE_T = ET3400_EXP;
+    } else if (prefix("HEATHKITA+ROM", MACHINE)) {
+      strcpy(MACHINE, "3400A XROM     "); 
+      MACHINE_T = ET3400A_EXP_ROM;
+    } else if (prefix("HEATHKITA+", MACHINE)) {
+      strcpy(MACHINE, "ET-3400A EXPANDED"); 
+      MACHINE_T = ET3400A_EXP;
+    } else if (prefix("ET-3400A", MACHINE)) {
+      strcpy(MACHINE, "ET-3400 A      "); 
       MACHINE_T = ET3400A;
-
-    // same for the ET-3400 
-    } else if (prefix("3400ROM1", MACHINE)) {
-      strcpy(MACHINE, "3400ROM 1          "); 
-      MACHINE_T = ET3400_EXP_ROM_V1;
-    } else if (prefix("3400ROM2", MACHINE)) {
-      strcpy(MACHINE, "3400ROM 2          "); 
-      MACHINE_T = ET3400_EXP_ROM_V2;
-    } else if (prefix("3400RAM1", MACHINE)) {
-      strcpy(MACHINE, "3400EXR 1          "); 
-      MACHINE_T = ET3400_EXP_RAM_V1; 
-    } else if (prefix("3400RAM2", MACHINE)) {
-      strcpy(MACHINE, "3400EXR 2          "); 
-      MACHINE_T = ET3400_EXP_RAM_V2;
-    } else if (prefix("ET3400", MACHINE)) {
-      strcpy(MACHINE, "3400 ST            "); 
+    } else if (prefix("HEATHKIT", MACHINE)) {
+      strcpy(MACHINE, "ET-3400 STOCK  "); 
       MACHINE_T = ET3400;
-      
     } else if (prefix("LABVOLT", MACHINE)) { 
-      strcpy(MACHINE, "LAB-VOLT           "); 
+      strcpy(MACHINE, "LAB-VOLT        "); 
       MACHINE_T = LABVOLT;
     } else if (prefix("MASTERLAB", MACHINE)) { 
-      strcpy(MACHINE, "MC-6400            "); 
+      strcpy(MACHINE, "MC-6400         "); 
       MACHINE_T = MC6400;
     } else if (prefix("MPF", MACHINE)) {
-      strcpy(MACHINE, "MPF-1              "); 
+      strcpy(MACHINE, "MPF-1           "); 
       MACHINE_T = MPF;
     } else {
       strcpy(MACHINE, "UNKNOWN MACHINE!"); 
@@ -1489,7 +1466,7 @@ int sd_read_init() {
       skip = true; 
       break; 
     }
-    print_line(0,"P3: %12s", BANK_PROG[2]); 
+    print_line(0,"P3:%12s", BANK_PROG[2]); 
     sleep_ms(DISPLAY_DELAY_SHORT);
 
     if (! f_gets(BANK_PROG[3], sizeof(BANK_PROG[3]), &fil)) {
@@ -1922,9 +1899,9 @@ void load_file(bool quiet) {
   switch (MACHINE_T) {
 
   case MPF :
-  case ET3400_EXP_RAM_V1 :
+  case ET3400_EXP :
       
-    for (uint32_t b = 0; b < 4096; b++) {
+    for (uint32_t b = 0; b < 2048; b++) {
 	
       uint32_t i = 
 	((b & 0b00000000000000000000000000100000) ? 1 : 0) << 0x5 |
@@ -1933,7 +1910,6 @@ void load_file(bool quiet) {
 	((b & 0b00000000000000000000000100000000) ? 1 : 0) << 0x2 |
 	((b & 0b00000000000000000000001000000000) ? 1 : 0) << 0x3 |
 	((b & 0b00000000000000000000010000000000) ? 1 : 0) << 0x4 |
-	((b & 0b00000000000000000000100000000000) ? 1 : 0) << 0xB |
 	((b & 0b00000000000000000000000000000001) ? 1 : 0) << 0x6 |
 	((b & 0b00000000000000000000000000000010) ? 1 : 0) << 0x7 |
 	((b & 0b00000000000000000000000000000100) ? 1 : 0) << 0x8 | 
@@ -1964,25 +1940,6 @@ void load_file(bool quiet) {
     }
 
     break;
-
-  case ET3400A_EXP_RAM_V1 :
-
-    for (uint32_t b = 0; b < 2048; b++) {	
-      ram[cur_bank][b] = sdram[b]; 
-    }
-    
-    break; 
-
-  case ET3400_EXP_RAM_V2 :
-  case ET3400_EXP_ROM_V2 :
-  case ET3400A_EXP_RAM_V2 :
-  case ET3400A_EXP_ROM_V2 :
-
-    for (uint32_t b = 0; b < 4096; b++) {	
-      ram[cur_bank][b] = sdram[b]; 
-    }
-    
-    break; 
 
   case LABVOLT :
   default: 
@@ -2063,9 +2020,9 @@ void pgm2() {
   switch (MACHINE_T) {
    
   case MPF :
-  case ET3400_EXP_RAM_V1 : 
+  case ET3400_EXP :
       
-    for (uint32_t b = 0; b < 4096; b++) {
+    for (uint32_t b = 0; b < 2048; b++) {
 	
       uint32_t i = 
 	((b & 0b00000000000000000000000000100000) ? 1 : 0) << 0x5 |
@@ -2074,7 +2031,6 @@ void pgm2() {
 	((b & 0b00000000000000000000000100000000) ? 1 : 0) << 0x2 |
 	((b & 0b00000000000000000000001000000000) ? 1 : 0) << 0x3 |
 	((b & 0b00000000000000000000010000000000) ? 1 : 0) << 0x4 |
-	((b & 0b00000000000000000000100000000000) ? 1 : 0) << 0xb |
 	((b & 0b00000000000000000000000000000001) ? 1 : 0) << 0x6 |
 	((b & 0b00000000000000000000000000000010) ? 1 : 0) << 0x7 |
 	((b & 0b00000000000000000000000000000100) ? 1 : 0) << 0x8 | 
@@ -2105,23 +2061,6 @@ void pgm2() {
     }
 
     break;
-
-  case ET3400A_EXP_RAM_V1 :
-
-    for (uint32_t b = 0; b < 2048; b++) {	
-      sdram[b] = ram[cur_bank][b];
-    }
-    break; 
-
-  case ET3400_EXP_RAM_V2 :
-  case ET3400_EXP_ROM_V2 :
-  case ET3400A_EXP_RAM_V2 :
-  case ET3400A_EXP_ROM_V2 :
-
-    for (uint32_t b = 0; b < 4096; b++) {	
-      sdram[b] = ram[cur_bank][b];
-    }
-    break; 
 
   case LABVOLT :
   default: 
@@ -2188,10 +2127,7 @@ void pgm2() {
 
   byte val = 0;
 
-  for (uint32_t pc = 0;
-       pc < ( MACHINE_T ==  ET3400_EXP_RAM_V2 || MACHINE_T ==  ET3400_EXP_ROM_V2 ||
-	      MACHINE_T == ET3400A_EXP_RAM_V2 || MACHINE_T == ET3400A_EXP_ROM_V2 
-	      ? 4096 : 2048) ; pc++) {
+  for (uint32_t pc = 0; pc < 2048 ; pc++) {
     val = sdram[pc]; 
     ret = f_printf(&fil, ( pc % 16 == 0) ? "\n%02X" : " %02X", val);
     if (ret < 0) {
@@ -2410,7 +2346,7 @@ void reset_hold(void) {
 }
 
 //
-// Philips MasterLab MC6400 
+//
 //
 
 void main_mc6400(void) {
@@ -2509,11 +2445,12 @@ void main_mc6400(void) {
 
 }
 
+
 //
-// Heathkit ET-3400 
+// this is used when Ultimate is plugged into the 2x 2112 sockets 
 //
 
-void main_et3400(void) { // Stock 4x 2112 512 Bytes 
+void main_et3400(void) {
 
   read = false; 
   confirmed = false; 
@@ -2573,7 +2510,7 @@ void main_et3400(void) { // Stock 4x 2112 512 Bytes
 
 }
 
-void main_et3400_exp_ram_v1(void) { // PicoRAM Revision 1, 2 KBs
+void main_et3400_exp(void) {
 
   
   read = false; 
@@ -2633,7 +2570,7 @@ void main_et3400_exp_ram_v1(void) { // PicoRAM Revision 1, 2 KBs
 
 }
 
-void main_et3400_exp_rom_v1(void) { // PicoRAM Revision 1, 2 KBs w
+void main_et3400_exp_rom(void) {
 
   read = false; 
   written = false; 
@@ -2678,125 +2615,8 @@ void main_et3400_exp_rom_v1(void) { // PicoRAM Revision 1, 2 KBs w
 
 }
 
-void main_et3400_exp_rom_v2(void) { // PicoRAM Revision 2, 2 KBs for now - TO DO: change decoder -> 4 KBs
 
-  read = false; 
-  written = false; 
-  confirmed = false; 
-
-  gpio_set_dir_masked(data_mask, 0);
-  gpio_put(SEL1, 0);
-  gpio_put(SEL2, 1);
-
-  reset_release();   
- 
-  while (true) {   
-
-    if ( ! gpio_get(CE_INPUT) ) { 
-
-      gpio_put(SEL1, 1);
-      gpio_put(SEL2, 0);
-
-      __asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n");
-      __asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
-      high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
-      low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5 */ 
-      m_adr = ( low_adr | high_adr ) & 0b111111111111;
-	                  
-      w_op = ram[cur_bank][m_adr]; 
-      gpio_set_dir_masked(data_mask, data_mask);
-      gpio_put_masked(data_mask, w_op << DATA_GPIO_START);
-
-      while ( ! gpio_get(CE_INPUT) ) {__asm volatile(" nop\n\n");  }; 
-      
-      gpio_put(SEL1, 0);
-      gpio_put(SEL2, 1);
-      gpio_set_dir_masked(data_mask, 0);
-     
-    } else {
-
-      // low_adr = ((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) & 0b111111; // A0 - A5
-      low_adr = gpio_get_all(); 
-    
-    }
-  }
-
-}
-
-void main_et3400_exp_ram_v2(void) { // PicoRAM Revision 2, 4 KBs RAM 
-
-  read = false; 
-  written = false; 
-  confirmed = false; 
-
-  gpio_set_dir_masked(data_mask, 0);
-  gpio_put(SEL1, 0);
-  gpio_put(SEL2, 1);
-
-  reset_release();   
- 
-  while (true) {   
-
-    if (disabled ) {
-      gpio_put(LED_PIN, 1);
-      confirmed = true;
-      while (disabled ) {}; 
-    }
-
-    if ( ! gpio_get(CE_INPUT) && ! disabled ) { 
-
-      gpio_put(SEL1, 1);
-      gpio_put(SEL2, 0);
-
-      if (gpio_get(WE_INPUT) ) {
-
-	__asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
-	__asm volatile(" nop\n nop\n nop\n nop\n\n"); 	
-	high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
-	low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5 
-	m_adr = ( low_adr | high_adr ) & 0b111111111111;
-	
-                  
-        w_op = ram[cur_bank][m_adr]; 
-        gpio_set_dir_masked(data_mask, data_mask);
-        gpio_put_masked(data_mask, w_op << DATA_GPIO_START);
-
-
-      }  else {
-
-	__asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
-	__asm volatile(" nop\n nop\n nop\n nop\n\n"); 	
-	high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
-	low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5  
-	m_adr = ( low_adr | high_adr ) & 0b111111111111; 
-
-      
-        r_op = (gpio_get_all() & data_mask) >> DATA_GPIO_START ;
-        ram[cur_bank][m_adr] = r_op;
-
-      }
-
-      while ( ! gpio_get(CE_INPUT) ) {__asm volatile(" nop\n\n");  }; 
-
-      gpio_put(SEL1, 0);
-      gpio_put(SEL2, 1);
-      gpio_set_dir_masked(data_mask, 0);
-     
-    } else {
-
-      // low_adr = ((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) & 0b111111; // A0 - A5
-      low_adr = gpio_get_all(); 
-    
-    }
-  }
-
-}
-
-//
-// Heathkit ET-3400A 
-// 
-
-void main_et3400a(void) { // Stock 2x 2114 512 Bytes 
+void main_et3400a(void) {
 
   read = false; 
   written = false; 
@@ -2857,7 +2677,7 @@ void main_et3400a(void) { // Stock 2x 2114 512 Bytes
 
 }
 
-void main_et3400a_exp_ram_v1(void) { // PicoRAM Revision 1, 2 KBs 
+void main_et3400a_exp(void) {
 
   read = false; 
   written = false; 
@@ -2918,68 +2738,7 @@ void main_et3400a_exp_ram_v1(void) { // PicoRAM Revision 1, 2 KBs
 
 }
 
-void main_et3400a_exp_ram_v2(void) { // PicoRAM Revision 2, 4 KBs 
-
-  read = false; 
-  written = false; 
-  confirmed = false; 
-
-  gpio_set_dir_masked(data_mask, 0);
-  gpio_put(SEL1, 0);
-  gpio_put(SEL2, 1);
-
-  reset_release();   
- 
-  while (true) {   
-
-    if ( ! gpio_get(CE_INPUT) ) { 
-
-      gpio_put(SEL1, 1);
-      gpio_put(SEL2, 0);
-
-      if (gpio_get(WE_INPUT) ) {
-
-	__asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
-	high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
-	low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5 
-	m_adr = ( low_adr | high_adr ) & 0b111111111111;
-	
-                  
-        w_op = ram[cur_bank][m_adr]; 
-        gpio_set_dir_masked(data_mask, data_mask);
-        gpio_put_masked(data_mask, w_op << DATA_GPIO_START);
-
-
-      }  else {
-
-	__asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
-	high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
-	low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5  
-	m_adr = ( low_adr | high_adr ) & 0b111111111111; 
-
-      
-        r_op = (gpio_get_all() & data_mask) >> DATA_GPIO_START ;
-        ram[cur_bank][m_adr] = r_op;
-
-      }
-
-      while ( ! gpio_get(CE_INPUT) ) {__asm volatile(" nop\n\n");  }; 
-
-      gpio_put(SEL1, 0);
-      gpio_put(SEL2, 1);
-      gpio_set_dir_masked(data_mask, 0);
-     
-    } else {
-
-      // low_adr = ((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) & 0b111111; // A0 - A5
-      low_adr = gpio_get_all(); 
-    
-    }
-  }
-
-}
-
-void main_et3400a_exp_rom_v1(void) { // PicoRAM Revision 1, 2 KBs 
+void main_et3400a_exp_rom(void) {
 
   read = false; 
   written = false; 
@@ -3022,54 +2781,6 @@ void main_et3400a_exp_rom_v1(void) { // PicoRAM Revision 1, 2 KBs
   }
 
 }
-
-void main_et3400a_exp_rom_v2(void) { // PicoRAM Revision 2, 2 KBs for now - TO DO: change decoder -> 4 KBs
-
-  read = false; 
-  written = false; 
-  confirmed = false; 
-
-  gpio_set_dir_masked(data_mask, 0);
-  gpio_put(SEL1, 0);
-  gpio_put(SEL2, 1);
-
-  reset_release();   
- 
-  while (true) {   
-
-    if ( ! gpio_get(CE_INPUT) ) { 
-
-      gpio_put(SEL1, 1);
-      gpio_put(SEL2, 0);
-
-      __asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
-      high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
-      low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5 */ 
-      m_adr = ( low_adr | high_adr ) & 0b111111111111;
-	                  
-      w_op = ram[cur_bank][m_adr]; 
-      gpio_set_dir_masked(data_mask, data_mask);
-      gpio_put_masked(data_mask, w_op << DATA_GPIO_START);
-
-      while ( ! gpio_get(CE_INPUT) ) {__asm volatile(" nop\n\n");  }; 
-      
-      gpio_put(SEL1, 0);
-      gpio_put(SEL2, 1);
-      gpio_set_dir_masked(data_mask, 0);
-     
-    } else {
-
-      // low_adr = ((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) & 0b111111; // A0 - A5
-      low_adr = gpio_get_all(); 
-    
-    }
-  }
-
-}
-
-//
-// Microprofessor MPF1-1(B) / MPF-IP 
-// 
 
 void main_mpf(void) {
 
@@ -3134,9 +2845,6 @@ void main_mpf(void) {
 
 }
 
-//
-// LabVolt 6502 
-//
 
 void main_labvolt(void) {
 
@@ -3221,8 +2929,9 @@ void main_labvolt(void) {
 
 }
 
+
 //
-// MAIN 
+//
 //
 
 int main() {
@@ -3365,16 +3074,12 @@ int main() {
   switch (MACHINE_T) {
     
   case ET3400 :
-  case ET3400_EXP_RAM_V1 :
-  case ET3400_EXP_RAM_V2 :
-  case ET3400_EXP_ROM_V1 :
-  case ET3400_EXP_ROM_V2 : multicore_launch_core1(display_loop_et3400); break;
+  case ET3400_EXP :
+  case ET3400_EXP_ROM : multicore_launch_core1(display_loop_et3400); break;
     
   case ET3400A : 
-  case ET3400A_EXP_RAM_V1 :
-  case ET3400A_EXP_RAM_V2 :
-  case ET3400A_EXP_ROM_V1 :
-  case ET3400A_EXP_ROM_V2 : multicore_launch_core1(display_loop_et3400a); break;
+  case ET3400A_EXP :
+  case ET3400A_EXP_ROM : multicore_launch_core1(display_loop_et3400a); break;
     
   case MPF : multicore_launch_core1(display_loop_et3400); break;
   
@@ -3405,17 +3110,13 @@ int main() {
 
   case UNKNOWN : show_error_and_halt("BAD CONFIG!"); break;
 
-  case ET3400 : main_et3400(); break; 
-  case ET3400_EXP_RAM_V1 : main_et3400_exp_ram_v1(); break; 
-  case ET3400_EXP_RAM_V2 : main_et3400_exp_ram_v2(); break; 
-  case ET3400_EXP_ROM_V1 : main_et3400_exp_rom_v1(); break; 
-  case ET3400_EXP_ROM_V2 : main_et3400_exp_rom_v2(); break; 
-    
-  case ET3400A : main_et3400a(); break; 
-  case ET3400A_EXP_RAM_V1 : main_et3400a_exp_ram_v1(); break; 
-  case ET3400A_EXP_RAM_V2 : main_et3400a_exp_ram_v2(); break; 
-  case ET3400A_EXP_ROM_V1 : main_et3400a_exp_rom_v1(); break;
-  case ET3400A_EXP_ROM_V2 : main_et3400a_exp_rom_v2(); break; 
+  case ET3400 : main_et3400(); break; // for Stock Heathkit ET-3400 4x 2112, 512 bytes 
+  case ET3400_EXP : main_et3400_exp(); break; // for Stock Heathkit with Expansion Header, 2 KBs 
+  case ET3400_EXP_ROM : main_et3400_exp_rom(); break; // for Stock Heathkit with Expansion Header, 2 KBs, ROM EMULATION MODE 
+
+  case ET3400A : main_et3400a(); break; // for Stock Heathkit ET-3400A 2x 2114, but 512 bytes only! 
+  case ET3400A_EXP : main_et3400a_exp(); break; // for Stock Heathkit ET-3400A with Expansion Header, 2 KBs 
+  case ET3400A_EXP_ROM : main_et3400a_exp_rom(); break; // for Stock Heathkit ET-3400A with Expansion Header, 2 KBs, ROM EMULATION MODE 
 
   case LABVOLT : main_labvolt(); break; 
 

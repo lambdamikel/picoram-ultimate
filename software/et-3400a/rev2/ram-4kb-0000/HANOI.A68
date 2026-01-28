@@ -1,0 +1,164 @@
+;; Towers of Hanoi for the Heathkit ET-3400 @ 0x0100h
+;; Written 6-28-2025 by Michael Wessel aka LambdaMikel
+
+; ===== Monitor ROM routines =====
+
+RESET  = $fc00
+INCH   = $fdf4
+ENCODE = $fdbb 
+OUTCH  = $fe3a 
+OUTHEX = $fe28
+OUTBYT = $fe20 
+OUTST1 = $fe50
+OUTST0 = $fd8d
+DSPLAY = $fd7b 
+IHB    = $fe09
+REDIS  = $fcbc
+
+DIGADD   = $00f0 
+ZDIGADD  = $00f0 
+
+DISC     = $00 
+FROM     = $01 
+TO       = $02 
+
+ORG     $0100 
+
+; ===== Program Entry =====
+START:   
+
+        JSR     ASK
+        
+        ; LDAA    #3             ; N     3, X
+        psha 
+        LDAA    #$0A             ; FROM  2, X 
+        psha 
+        LDAA    #$0B             ; VIA   1, X
+        psha  
+        LDAA    #$0C             ; TO    0, x
+        psha  
+        
+        TSX 
+        LDAA 3, X ; N 
+        STAA DISC
+        LDAA 2, X  ; FROM 
+        STAA FROM 
+        LDAA 0, X  ; TO 
+        STAA TO 
+        
+        JSR     HANOI
+        JSR     DONE 
+        JSR     INCH 
+      
+        jmp START 
+
+; ===== Recursive Subroutine: HANOI(N, FROM, VIA, TO) =====
+HANOI:
+        TSX 
+        LDAA 5, X ; N 
+        
+        CMPA    #$0
+        BNE     RECURSE
+        
+        RTS 
+        
+RECURSE:
+
+        ; --- First recursive call: HANOI(N-1, FROM, TO, VIA) ---
+        TSX 
+        
+        LDAA  5, X ; N 
+        DECA
+        PSHA
+        
+        LDAA  4, X ; FROM -> FROM 
+        psha 
+        LDAA  2, X ; TO   -> VIA
+        psha  
+        LDAA  3, X ; VIA  -> TO  
+        psha  
+        
+        JSR     HANOI
+        
+        PULA
+        PULA
+        PULA
+        PULA 
+        
+        TSX 
+        LDAA  5, X ; N 
+        STAA DISC
+        LDAA  4, X  ; FROM 
+        STAA FROM 
+        LDAA  2, X  ; TO 
+        STAA TO 
+     
+        JSR PRINT_MOVE 
+        
+        ; --- Second recursive call: HANOI(N-1, VIA, FROM, TO) ---
+        TSX 
+        LDAA 5, X ; N 
+        DECA
+        PSHA
+        
+        LDAA  3, X ; VIA  -> FROM 
+        psha 
+        LDAA  4, X ; FROM -> VIA 
+        psha  
+        LDAA  2, X ; TO   -> TO  
+        psha  
+        
+        JSR     HANOI
+        
+        PULA    ; Pop Stack Frame 
+        PULA
+        PULA 
+        PULA 
+        
+        RTS 
+
+
+WAIT:
+        LDX #$6000
+WAIT0:
+        DEX
+        BNE WAIT0
+        RTS 
+
+PRINT_MOVE:
+       
+        JSR     REDIS
+ 
+        LDAA DISC 
+        JSR     OUTBYT
+        
+        LDAA FROM  
+        JSR     OUTBYT
+        
+        LDAA TO 
+        JSR     OUTBYT
+
+        ; jsr WAIT 
+        jsr INCH
+
+        RTS
+ 
+ASK:    JSR REDIS
+        
+        LDAA #$d1
+        JSR  OUTBYT
+        
+        LDAA #$5c 
+        JSR OUTBYT
+        
+        JSR INCH 
+        RTS
+
+
+DONE:   JSR OUTST0 
+        FCB $08, $08, $08, $08, $08, $88 
+        RTS        
+        
+        
+        
+        

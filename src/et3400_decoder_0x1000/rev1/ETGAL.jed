@@ -1,0 +1,24 @@
+
+CUPL(WM)        5.0a  Serial# 60008009
+Device          g16v8s  Library DLIB-h-40-9
+Created         Tue Jan 27 19:40:45 2026
+Name            ETGAL 
+Partno          00 
+Revision        01 
+Date            01.24.2026 
+Designer        Michael Wessel / LambdaMikel 
+Company         Home 
+Assembly        None 
+Location        
+*QP20 
+*QF2194 
+*G0 
+*F0 
+*L01024 11111101011010111011101111111111
+*L01792 11111111011010111011101111111111
+*L02048 00000001001100000011000000100000
+*L02112 00000000111101101111111111111111
+*L02144 11111111111111111111111111111111
+*L02176 111111111111111110
+*C1026
+*8152

@@ -1,0 +1,65 @@
+
+*******************************************************************************
+                                     ETGAL
+*******************************************************************************
+
+CUPL(WM)        5.0a Serial# 60008009
+Device          g16v8s  Library DLIB-h-40-9
+Created         Tue Jan 27 19:41:34 2026
+Name            ETGAL 
+Partno          00 
+Revision        01 
+Date            01.24.2026 
+Designer        Michael Wessel / LambdaMikel 
+Company         Home 
+Assembly        None 
+Location        
+
+===============================================================================
+                            Expanded Product Terms
+===============================================================================
+
+ACCESS =>
+    A12 & A13 & A14 & A15 & !VMA
+
+RAM_SELECT =>
+    A12 & A13 & A14 & A15
+
+RE =>
+    A12 & A13 & A14 & A15 & !VMA & WR
+
+SE =>
+    A12 & A13 & A14 & A15 & !VMA
+
+
+===============================================================================
+                                 Symbol Table
+===============================================================================
+
+Pin Variable                                    Pterms   Max     Min    
+Pol   Name              Ext     Pin     Type     Used   Pterms  Level   
+--- --------            ---     ---     ----    ------  ------  -----   
+
+    A6                          1        V        -       -       -     
+    A7                          2        V        -       -       -     
+    A8                          3        V        -       -       -     
+    A9                          4        V        -       -       -     
+    A10                         5        V        -       -       -     
+    A11                         6        V        -       -       -     
+    A12                         7        V        -       -       -     
+    A13                         8        V        -       -       -     
+    A14                         9        V        -       -       -     
+    A15                         11       V        -       -       -     
+    ACCESS                      0        I        1       -       -     
+    RAM_SELECT                  0        I        1       -       -     
+    RE                          15       V        1       8       0     
+    SE                          12       V        1       8       0     
+    VMA                         18       V        -       -       -     
+    WR                          19       V        -       -       -     
+
+
+LEGEND    D : default variable         F : field      G : group
+          I : intermediate variable    N : node       M : extended node
+          U : undefined                V : variable   X : extended variable
+          T : function
+
