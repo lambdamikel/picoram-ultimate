@@ -1,7 +1,7 @@
 
 CUPL(WM)        5.0a  Serial# 60008009
 Device          g16v8s  Library DLIB-h-40-9
-Created         Tue Jan 27 19:41:10 2026
+Created         Fri Jan 30 15:08:20 2026
 Name            ETGAL 
 Partno          00 
 Revision        01 
@@ -21,4 +21,4 @@ Location
 *L02144 11111111111111111111111111111111
 *L02176 111111111111111110
 *C0F48
-*8164
+*8151

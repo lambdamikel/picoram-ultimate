@@ -289,9 +289,9 @@ by plugging in two more 2112 SRAMs into `IC16` and `IC17`. PicoRAM
 connects to `IC14` and `IC17` and can emulate 512 bytes of memory in the
 address range `0x0000 - 0x01ff`.
 
-![ET-3400 Stock Config](pics/ultimate-heathkit1.JPG)
+![ET-3400 Stock Config](pics/ultimate-heathkit2-rev2.JPG)
 
-![ET-3400 Stock Config 2](pics/ultimate-heathkit2.JPG)
+![ET-3400 Stock Config 2](pics/ultimate-heathkit1-rev2.JPG)
 
 Note that this applies to the ET-3400 with *original MC6800 CPU with
 no upgraded crystal*, and that you will need a jumper cable from the
@@ -305,12 +305,17 @@ The jumper configuration for this mode is:
 
 | JP1 | JP2 | JP3 | JP4 | JP5 | JP6 | JP7 | JP8 | JP9 | A9 | A10 | 
 |-----|-----|-----|-----|-----|-----|-----|-----|-----|----|-----|
-| *   | R   | N   | R   | *   | R   | R   | L   | -   | U  | U   | 
+| *   | XR  | N   |  R  | *   | R   | R   | L   | (R) | U  | U   | 
 
-Where `*` = don't care, `-` for NO JUMPER INSTALLED, and for `N`: 
+Where `*` = don't care, `XR` = experiment what works best
+for your machine, but the default should be `R`, and `N` means:
 
-- L: 4x 2112 (IC14 - IC17), `0x0000` - `0x00FF` and `0x0100` - `0x01ff`, 512 bytes
-- R: 2x 2112 (IC14 - IC15), `0x0000` - `0x00FF`, 256 bytes 
+- L: 4x 2112 (IC14 - IC17), `0x0000` - `0x00FF` and `0x0100` - `0x01ff`, 512 bytes.
+- R: 2x 2112 (IC14 - IC15), `0x0000` - `0x00FF`, 256 bytes. 
+
+Note that the GAL is not required in this configuration. 
+Hence, `(R)` means that this jumper is 
+only required if the GAL is installed.
 
 ### Stock Heathkit ET-3400A without Expansion Header
 
@@ -323,11 +328,12 @@ The stock system comes with 2 2114 SRAM chips (`U14` and `U15`),
 providing 512 Bytes from `0x0000 - 0x01ff`. Interestingly, only 512
 Bytes are utilized by the ET-3400A instead of the full 1 KB provided
 by the 2 2114, as the Heathkit designers did not connect the 10th
-address bit (`A9`) to `U14`, `U15`.
+address bit of the CPU (`A9`) to `U14`, `U15` (instead, pin 15 
+is simply connected to GND for these chips). 
 
-![ET-3400a Stock Config](pics/ultimate-heathkit-a-1.JPG)
+![ET-3400a Stock Config](pics/ultimate-heathkit-a-1-rev2.JPG)
 
-![ET-3400a Stock Config 2](pics/ultimate-heathkit-a-2.JPG)
+![ET-3400a Stock Config 2](pics/ultimate-heathkit-a-2-rev2.JPG)
 
 You will also need a jumper cable from the `HALT` pin of PicoRAM's
 `J3` header to the ET-3400's `HALT` breadboard connector, as shown in
@@ -340,9 +346,14 @@ The jumper configuration for this mode is:
 
 | JP1 | JP2 | JP3 | JP4 | JP5 | JP6 | JP7 | JP8 | JP9 | A9 | A10 | 
 |-----|-----|-----|-----|-----|-----|-----|-----|-----|----|-----|
-| *   | R   | *   | R   | *   | *   | R   | R   | -   | D  | D   | 
+| *   | XL  | *   | R   | L   | *   | R   | R   | (R) | D  | D   | 
 
-Where `*` = don't care, and  `-` for NO JUMPER INSTALLED,
+Where `*` = don't care, and `XL` = experiment what works best
+for your machine, but the default should be `L`. 
+
+Note that the GAL is not required in this configuration. 
+Hence, `(R)` means that this jumper is 
+only required if the GAL is installed.
 
 ### Stock Heathkit ET-3400 with Expansion Header
 
