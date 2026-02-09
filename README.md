@@ -85,16 +85,16 @@ written by CoPilot, especially for the visual / graphical [Towers of
 Hanoi program
 `HANOIG.RAM`](software/et-3400/rev2/io-rom-4kb-1000/HANOIG.A68).
 
-It should be noted that mode is still experimental and not fully
-stable yet; but have a loot at [this,](https://youtu.be/VSempOfuLcc)
+It should be noted that this mode is still experimental and not fully
+stable yet; but have a look at [this,](https://youtu.be/VSempOfuLcc)
 [this,](https://youtu.be/9M1EXb85hKk) and
 [this](https://youtu.be/RZBmiNyekSo) YT video to get an impression.
 Overall, it already works pretty well. In particular, it is necessary
-to not send the IO bytes to address `0x1800` too fast; processing
-speed also depends on the command (unfortauntely, PicoRAM cannot block
-the CPU while it is execution IO commands, as this results in unstable
-operation). So proper "synchronization by hand" is required in order
-to get stable operation. 
+to not send IO bytes to address `0x1800` too fast; processing speed
+also depends on the type of command (unfortunately, PicoRAM can not
+halt the CPU while it is executing IO commands, as this results in
+unstable operation). So proper "synchronization by hand" is required
+in order to get stable operation.
 
 ![Graphics ET-3400 Hanoi](pics/graphics-et3400-hanoi.JPG)
 
