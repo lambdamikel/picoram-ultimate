@@ -66,11 +66,11 @@ both the Heathkit ET-3400 and the ET-3400A.](https://youtu.be/Ko7TkqEhiPQ)
 Firmware version 2.1 adds some experimental IO capabilities to PicoRAM
 for the ET-3400 (not A currently); namely, text and graphics commands.
 
-To use this experimental mode, the [`0x1000` to `0x1ff` address
+To use this experimental mode, the [`0x1000` to `0x1fff` address
 decoder is required](src/et3400_decoder_0x1000/rev2/), and the 4x 2112
 SRAM chips for 512 Bytes of SRAM memory are retained. In this mode,
 PicoRAM acts as a \emph{ROM emulator for now}, so writes to the
-`0x1000` to `0x1ff` are protected, but it listens to writes to address
+`0x1000` to `0x1fff` are protected, but it listens to writes to address
 `0x1800` which acts as a "one byte serial" communication channel from
 the ET-3400 to PicoRAM for driving the text and graphics display
 (i.e., for sending IO commands). There are a number of demo programs
