@@ -69,14 +69,15 @@ for the ET-3400 (not A currently); namely, text and graphics commands.
 To use this experimental mode, the [`0x1000` to `0x1fff` address
 decoder is required](src/et3400_decoder_0x1000/rev2/), and the 4x 2112
 SRAM chips for 512 Bytes of SRAM memory are retained. In this mode,
-PicoRAM acts as a *ROM emulator for now*, so writes to the `0x1000` to
-`0x1fff` are protected, but it listens to writes to address `0x1800`
-which acts as a "one byte serial" communication channel from the
-ET-3400 to PicoRAM for driving the text and graphics display (i.e.,
-for sending IO commands). There are a number of demo programs in [this
-folder.](software/et-3400/rev2/io-rom-4kb-1000/) that demonstrate how
-to utilize the provided text and graphics commands. Note that the
-machine identifier is `3400IO` for this mode; also see the supplied
+PicoRAM acts as a *ROM emulator for now*, so writes to the memory from
+`0x1000` to `0x1fff` are protected, with the exception of address
+`0x1800` (for now) which acts as a "one byte serial" communication
+channel from the ET-3400 to PicoRAM for driving the text and graphics
+display (i.e., for sending IO commands). There are a number of demo
+programs in [this folder.](software/et-3400/rev2/io-rom-4kb-1000/)
+that demonstrate how to utilize the provided text and graphics
+commands. Note that the machine identifier is `3400IO` for this mode;
+also see the supplied
 [`ULTIMATE.INI`](software/et-3400/rev2/io-rom-4kb-1000/ULTIMATE.INI)
 and the [three demo programs](software/et-3400/rev2/io-rom-4kb-1000/)
 which are supplied in `.A68` assembly format. Large portions were
