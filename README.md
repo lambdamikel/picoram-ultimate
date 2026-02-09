@@ -58,7 +58,50 @@ both the Heathkit ET-3400 and the ET-3400A.](https://youtu.be/Ko7TkqEhiPQ)
 
 ![YouTube Video Rev. 2](pics/youtube-rev2.jpg)
 
-## Overview 
+
+## Latest News
+
+### February 2026
+
+Firmware version 2.1 adds some experimental IO facilities to PicoRAM
+for the ET-3400 (not A currently), namly, text and graphics commands.
+
+To use this experimental mode, the [`0x1000` to `0x1ff` address
+decoder is required](src/et3400_decoder_0x1000/rev2/), and the 4x 2112
+SRAM chips for 512 Bytes of SRAM memory are retained. In this mode,
+PicoRAM acts as a \emph{ROM emulator for now}, so writes to the
+`0x1000` to `0x1ff` are protected, but it listens to writes to address
+`0x1800` which acts as a "one byte serial" communication channel from
+the ET-3400 to PicoRAM for driving the text and graphics display
+(i.e., for sending IO commands). There are a number of demo programs
+in [this folder.](software/et-3400/rev2/io-rom-4kb-1000/) that
+demonstrate how to utilize the provided text and graphics
+commands. Note that the machine identifier is `3400IO` for this mode;
+also see the supplied
+[`ULTIMATE.INI`](software/et-3400/rev2/io-rom-4kb-1000/ULTIMATE.INI)
+and the [three demo programs](software/et-3400/rev2/io-rom-4kb-1000/)
+which are supplied in `.A68` assembly format. Large portions were
+written by CoPilot, especially for the visual / graphical [Towers of
+Hanoi program
+`HANOIG.RAM`](software/et-3400/rev2/io-rom-4kb-1000/HANOIG.A68).
+
+It should be noted that mode is still experimental and not fully
+stable yet; but have a loot at [this,](https://youtu.be/VSempOfuLcc)
+[this,](https://youtu.be/9M1EXb85hKk) and
+[this](https://youtu.be/RZBmiNyekSo) YT video to get an impression.
+Overall, it already works pretty well. In particular, it is necessary
+to not send the IO bytes to address `0x1800` too fast; processing
+speed also depends on the command (unfortauntely, PicoRAM cannot block
+the CPU while it is execution IO commands, as this results in unstable
+operation). So proper "synchronization by hand" is required in order
+to get stable operation. 
+
+![Graphics ET-3400 Hanoi](pics/graphics-et3400-hanoi.JPG)
+
+![Graphics ET-3400 Diagonal Net](pics/graphics-et3400-net.jpg) 
+
+
+## Overview
 
 PicoRAM Ultimate is powered directly from the host machine; i.e., via
 the 5V and GND SRAM socket power pins.
