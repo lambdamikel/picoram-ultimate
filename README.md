@@ -64,7 +64,7 @@ both the Heathkit ET-3400 and the ET-3400A.](https://youtu.be/Ko7TkqEhiPQ)
 ### February 2026
 
 Firmware version 2.1 adds some experimental IO capabilities to PicoRAM
-for the ET-3400 (not A currently), namly, text and graphics commands.
+for the ET-3400 (not A currently); namely, text and graphics commands.
 
 To use this experimental mode, the [`0x1000` to `0x1ff` address
 decoder is required](src/et3400_decoder_0x1000/rev2/), and the 4x 2112
