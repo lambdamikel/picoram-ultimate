@@ -1,0 +1,296 @@
+;
+; Diagonal Graphics Net PicoRAM Ultimate Firmware V2.1 
+; Decoder: 4kb, 0x1000 - 0x1fff
+; IO Byte: 0x1800
+; 
+
+	.ORG    $0000 
+
+;
+; Temp Variables 
+; 
+
+ACOUNTER    =       $00 
+BCOUNTER    =       $01 
+
+X1          =       $02 
+Y1          =       $03 
+X2          =       $04 
+Y2          =       $05 
+
+STEP        =       $06 
+
+; Heathkit firmware routines
+
+
+RESET       =       $fc00 
+INCH        =       $fdf4 
+ENCODE      =       $fdbb 
+OUTCH       =       $fe3a 
+OUTHEX      =       $fe28 
+OUTBYT      =       $fe20 
+OUTST1      =       $fe50 
+DSPLAY      =       $fd7b 
+IHB         =       $fe09 
+REDIS       =       $fcbc 
+
+DIGADD      =       $00f0 
+ZDIGADD     =       $00f0 
+
+
+            .ORG    $1000 
+
+STEP        =       0x10 
+
+
+START:      JSR     CLEARSCREEN 
+            JSR     LDelay 
+            JSR     LDelay 
+
+; 53 54 45 50 20 53 49 5A 45 3F
+
+            LDAA    #$53 
+            PSHA     
+            JSR     printchar 
+
+            LDAA    #$54 
+            PSHA     
+            JSR     printchar 
+
+            LDAA    #$45 
+            PSHA     
+            JSR     printchar 
+
+            LDAA    #$50 
+            PSHA     
+            JSR     printchar 
+
+            LDAA    #$20 
+            PSHA     
+            JSR     printchar 
+
+            LDAA    #$53 
+            PSHA     
+            JSR     printchar 
+
+            LDAA    #$49 
+            PSHA     
+            JSR     printchar 
+
+            LDAA    #$5A 
+            PSHA     
+            JSR     printchar 
+
+            LDAA    #$45 
+            PSHA     
+            JSR     printchar 
+
+            LDAA    #$3f 
+            PSHA     
+            JSR     printchar 
+
+            JSR     ASK 
+            ADDA    #8 
+
+            STAA    STEP 
+
+; 48 45 4C 4C 4F 20 57 4F 52 4C 44
+;jsr INCH
+
+; ---------------------------------------------------------
+; Draw diagonal net:
+; A = outer loop, 0..0x7F step 8
+; B = inner loop, 0..0x7F step 8
+; Line: (A,0) -> (B,0x1F)
+; Arguments must be pushed FILO:
+;   push y2, x2, y1, x1
+; ---------------------------------------------------------
+
+START_NET:           
+            LDAA    #0 
+            STAA    ACOUNTER 
+
+A_LOOP:              
+            LDAA    #0 
+            STAA    BCOUNTER 
+
+B_LOOP:              
+; -----------------------------------------
+; Compute coordinates:
+;   x1 = A
+;   y1 = 0
+;   x2 = B
+;   y2 = 0x1F
+; -----------------------------------------
+
+; ---- push y2 ----
+            LDAA    #$1F 
+            STAA    Y2 
+
+; ---- push x2 ----
+            LDAA    BCOUNTER 
+            STAA    X2 
+
+; ---- push y1 ----
+            LDAA    #8 
+            STAA    Y1 
+
+; ---- push x1 ----
+            LDAA    ACOUNTER 
+            STAA    X1 
+
+            JSR     DRAWLINE 
+
+
+; ---- increment B ----
+            LDAA    BCOUNTER 
+            ADDA    STEP 
+            STAA    BCOUNTER 
+            CMPA    #$80 
+            BCS     B_LOOP 
+
+; ---- increment A ----
+            LDAA    ACOUNTER 
+            ADDA    STEP 
+            STAA    ACOUNTER 
+            CMPA    #$80 
+            BCS     A_LOOP 
+
+            JSR     INCH 
+
+            JMP     start 
+
+
+DRAWLINE:            
+
+            LDAA    #$05 ; draw line command
+            JSR     EXEC 
+
+            LDAA    X1 
+            JSR     EXEC 
+
+            LDAA    Y1 
+            JSR     EXEC 
+
+            LDAA    X2 
+            JSR     EXEC 
+
+            LDAA    Y2 
+            JSR     EXEC 
+
+;jsr INCH
+            JSR     Ldelay 
+
+            RTS      
+
+
+CLEARSCREEN:         
+
+            PSHA     
+
+            LDAA    #$00 ; clear screen command
+            JSR     EXEC 
+
+            PULA     
+
+            RTS      
+
+PRINTCHAR:           
+
+            PSHA     
+            PSHA     
+
+            LDAA    #$02 
+            JSR     EXEC 
+
+            PULA     
+            JSR     EXEC 
+
+            PULA     
+
+            JSR     LDelay 
+
+            RTS      
+
+
+EXEC:                
+
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+
+
+            STAA    $1800 
+
+
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            JSR     Delay 
+
+            RTS      
+
+
+DELAY:               
+            PSHA     ; save A
+            PSHB     ; save B
+
+            LDAA    #$03 ; outer loop count
+OUTER:      LDAB    #$FF ; inner loop count
+
+INNER:      DECB     ; 2 cycles
+            BNE     Inner ; 3 (taken), 2 (final)
+
+            DECA     ; 2 cycles
+            BNE     Outer ; 3 (taken), 2 (final)
+
+            PULB     
+            PULA     
+            RTS      
+
+
+LDELAY:              
+            PSHA     ; save A
+            PSHB     ; save B
+
+            LDAA    #$10 ; outer loop count
+LOUTER:     LDAB    #$FF ; inner loop count
+
+LINNER:     DECB     ; 2 cycles
+            BNE     LInner ; 3 (taken), 2 (final)
+
+            DECA     ; 2 cycles
+            BNE     LOuter ; 3 (taken), 2 (final)
+
+            PULB     
+            PULA     
+            RTS      
+
+
+
+ASK:        JSR     REDIS 
+
+            LDAA    #$00 
+            JSR     OUTBYT 
+
+            LDAA    #$0f 
+            JSR     OUTBYT 
+
+            JSR     INCH 
+            RTS      

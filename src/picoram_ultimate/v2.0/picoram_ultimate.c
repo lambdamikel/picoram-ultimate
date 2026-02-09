@@ -21,56 +21,10 @@
 //
 //
 
-#define VERSION "v2.1 02-08-2026"
+#define VERSION "v2.0 01-27-2026"
 
 //
 // Supported Machines
-//
-
-typedef enum {
-  CLEAR,       // clear screen, 0 args 
-  NEWLINE ,    // newline cursor y := y+1, 0 args 
-  PRINT,       // print char + advance cursor, 1 arg
-  PRINT0,      // print char at (x,y), 1 arg
-  LOCATE,      // locate cursor (x,y), 2 args 
-  LINE,        // DRAW LINE (x1,y1) - (x2,y2), 4 args
-  SEND_CHAR,   // 1 arg, send char to text buffer 
-  PRINT_LINE,  // 0 args, prints at line 4, scrolls up 
-  CLEAR_LINE0, // 0 arg, fills rem. after send char with 32 
-  UNLINE       // UNDRAW LINE (x1,y1) - (x2,y2), 4 args
-
-} IO_COMMAND_TYPE;
-
-//
-// ADC Configuration (ULTIMATE.INI file!) 
-// 
-
-#define FILE_LENGTH 20
-#define FILE_BUFF_SIZE 25
-#define FILE_EXT "*.RAM" 
-
-//
-//
-//
-
-volatile bool IO_DETECTED = false; 
-volatile bool ACCEPT_NEXT_IO_BYTE = true;
-  
-volatile uint8_t IO_BYTE = 0; 
-volatile uint8_t IO_BYTES_REM = 0; 
-
-volatile IO_COMMAND_TYPE IO_COMMAND = CLEAR; 
-
-volatile uint8_t BUFF_INDEX = 0; 
-volatile uint8_t CUR_X = 0; 
-volatile uint8_t CUR_Y = 0; 
-volatile uint8_t CUR_X1 = 0; 
-volatile uint8_t CUR_Y1 = 0; 
-volatile uint8_t CUR_X2 = 0; 
-volatile uint8_t CUR_Y2 = 0; 
-
-//
-//
 //
 
 typedef enum {
@@ -81,7 +35,6 @@ typedef enum {
   ET3400_EXP_RAM_V2, // V2 = PicoRAM PCB Rev. 2, 4 KBs 
   ET3400_EXP_ROM_V1, // ROM 2 KBs
   ET3400_EXP_ROM_V2, // ROM 4 KBs 
-  ET3400_EXP_ROM_IO, // ROM 4 KBs 0x1000 - 0x1fff, IO extension port: 0x1800
 
   ET3400A, // Stock 512 Bytes 2x 2114
   ET3400A_EXP_RAM_V1, // V1 = PicoRAM PCB Rev. 1, 2 KBs 
@@ -95,17 +48,20 @@ typedef enum {
 } MACHINE_TYPE;
 
 //
-//
-//
+// ADC Configuration (ULTIMATE.INI file!) 
+// 
 
+#define FILE_LENGTH 20
+#define FILE_BUFF_SIZE 25
+#define FILE_EXT "*.RAM" 
+
+//
+//
+//
 
 #define ADC_DEBUG_DELAY 100
 
 volatile MACHINE_TYPE MACHINE_T = UNKNOWN; 
-
-//
-//
-//
 
 volatile bool DEBUG_ADC = false; 
 volatile bool TUNE_ADC = false; 
@@ -348,30 +304,12 @@ void disp_plot(int x, int y) {
   render(buf, &frame_area); 
 }
 
-void undisp_plot0(int x, int y) {
-  SetPixel(buf, x, y, false);
-}
-
-void undisp_plot(int x, int y) {
-  SetPixel(buf, x, y, false);
-  render(buf, &frame_area); 
-}
-
 void disp_line0(int x1, int y1, int x2, int y2 ) {
   DrawLine(buf, x1, y1, x2, y2, true);
 }
 
 void disp_line(int x1, int y1, int x2, int y2 ) {
   DrawLine(buf, x1, y1, x2, y2, true);
-  render(buf, &frame_area); 
-}
-
-void undisp_line0(int x1, int y1, int x2, int y2 ) {
-  DrawLine(buf, x1, y1, x2, y2, false);
-}
-
-void undisp_line(int x1, int y1, int x2, int y2 ) {
-  DrawLine(buf, x1, y1, x2, y2, false);
   render(buf, &frame_area); 
 }
 
@@ -604,7 +542,7 @@ void display_loop_et3400() {
     } else {
       save_buttons_config_file(); 
     }
-  }  
+  } 
 
   //
   //
@@ -751,83 +689,7 @@ void display_loop_et3400() {
       disabled = false;
       reset_release(); 
       
-    } else if ( IO_DETECTED ) {
-
-      if (! IO_BYTES_REM) {
-
-	gpio_put(LED_PIN, 1);
-
-	switch (IO_BYTE) {
-
-	case CLEAR : clear_screen(); CUR_X = 0; CUR_Y = 0; IO_COMMAND = IO_BYTE; break; 
-	case NEWLINE : CUR_Y++; CUR_X = 0; IO_COMMAND = IO_BYTE; if (CUR_Y == 4) { clear_screen(); CUR_Y = 0; } break; 
-	case PRINT : 
-	case PRINT0 : IO_BYTES_REM = 1; IO_COMMAND = IO_BYTE; break; 
-	case LOCATE : IO_BYTES_REM = 2; IO_COMMAND = IO_BYTE; break; 
-	case LINE   : 
-	case UNLINE  : IO_BYTES_REM = 4; IO_COMMAND = IO_BYTE; break; 
-	case SEND_CHAR : IO_BYTES_REM = 1; IO_COMMAND = IO_BYTE; break; 
-	case PRINT_LINE : text_buffer[BUFF_INDEX++]=0; print_line(CUR_Y, text_buffer); BUFF_INDEX = 0; break; 
-	case CLEAR_LINE0 :
-	  { int i; 
-   	    for ( i = BUFF_INDEX; i < 16; i++) { text_buffer[i]=32; };
-	    BUFF_INDEX =i; 
-	  }
-	  break;
-	default : break; 
-	}
-
-	//print_string(0,0,"*%02x %02x", IO_BYTE, IO_BYTES_REM);
-	
-
-      } else {
-
-	IO_BYTES_REM--;
-	
-	// print_string(0,0," %02x %02x %02x", IO_COMMAND, IO_BYTES_REM, IO_BYTE);
-	
-	if (! IO_BYTES_REM) {
-
-	  gpio_put(LED_PIN, 0);
-
-	  switch (IO_COMMAND) {
-  	  case PRINT : print_char(CUR_X++, CUR_Y, IO_BYTE); break; 
-	  case PRINT0 : print_char0(CUR_X++, CUR_Y, IO_BYTE); break;  
-	  case LOCATE : CUR_Y = IO_BYTE; break;  
-	  case LINE : CUR_Y2 = IO_BYTE; disp_line(CUR_X1, CUR_Y1, CUR_X2, CUR_Y2); break;
-	  case UNLINE : CUR_Y2 = IO_BYTE; undisp_line(CUR_X1, CUR_Y1, CUR_X2, CUR_Y2); break;
-	  case SEND_CHAR : text_buffer[BUFF_INDEX++] = IO_BYTE; break; 
-
-	  default : break;
-	  }
-	  //render_display(); 
-
-	} else if (IO_BYTES_REM == 1) {
-	  switch (IO_COMMAND) {	    
-    	  case LOCATE : CUR_X = IO_BYTE; break; 
-    	  case LINE : 
-    	  case UNLINE : CUR_X2 = IO_BYTE; break; 
-	  default : break; 
-	  }
-	} else if (IO_BYTES_REM == 2) {
-	  switch (IO_COMMAND) {	    
-    	  case LINE : 
-    	  case UNLINE : CUR_Y1 = IO_BYTE; break; 
-	  default : break; 
-	  }
-	} else if (IO_BYTES_REM == 3) {
-	  switch (IO_COMMAND) {	    
-    	  case LINE : 
-    	  case UNLINE : CUR_X1 = IO_BYTE; break; 
-	  default : break; 
-	  }
-	}
-      }
-
-      IO_DETECTED = false;
-      ACCEPT_NEXT_IO_BYTE = true; 
-
-    }
+    } 
   }
   
 }
@@ -1510,7 +1372,7 @@ int sd_read_init() {
       strcpy(MACHINE, "3400A ST           "); 
       MACHINE_T = ET3400A;
 
-      // same for the ET-3400 
+    // same for the ET-3400 
     } else if (prefix("3400ROM1", MACHINE)) {
       strcpy(MACHINE, "3400ROM 1          "); 
       MACHINE_T = ET3400_EXP_ROM_V1;
@@ -1523,9 +1385,6 @@ int sd_read_init() {
     } else if (prefix("3400RAM2", MACHINE)) {
       strcpy(MACHINE, "3400EXR 2          "); 
       MACHINE_T = ET3400_EXP_RAM_V2;
-    } else if (prefix("3400IO", MACHINE)) {
-      strcpy(MACHINE, "3400ROM IO         "); 
-      MACHINE_T = ET3400_EXP_ROM_IO;
     } else if (prefix("ET3400", MACHINE)) {
       strcpy(MACHINE, "3400 ST            "); 
       MACHINE_T = ET3400;
@@ -2115,7 +1974,6 @@ void load_file(bool quiet) {
     break; 
 
   case ET3400_EXP_RAM_V2 :
-  case ET3400_EXP_ROM_IO :
   case ET3400_EXP_ROM_V2 :
   case ET3400A_EXP_RAM_V2 :
   case ET3400A_EXP_ROM_V2 :
@@ -2256,7 +2114,6 @@ void pgm2() {
     break; 
 
   case ET3400_EXP_RAM_V2 :
-  case ET3400_EXP_ROM_IO :
   case ET3400_EXP_ROM_V2 :
   case ET3400A_EXP_RAM_V2 :
   case ET3400A_EXP_ROM_V2 :
@@ -2333,7 +2190,6 @@ void pgm2() {
 
   for (uint32_t pc = 0;
        pc < ( MACHINE_T ==  ET3400_EXP_RAM_V2 || MACHINE_T ==  ET3400_EXP_ROM_V2 ||
-	      MACHINE_T ==  ET3400_EXP_ROM_IO || 
 	      MACHINE_T == ET3400A_EXP_RAM_V2 || MACHINE_T == ET3400A_EXP_ROM_V2 
 	      ? 4096 : 2048) ; pc++) {
     val = sdram[pc]; 
@@ -2746,7 +2602,7 @@ void main_et3400_exp_ram_v1(void) { // PicoRAM Revision 1, 2 KBs
       gpio_put(SEL2, 1);
 
       m_adr = low_adr | high_adr;
-      
+
     }
 
     //
@@ -2921,83 +2777,11 @@ void main_et3400_exp_ram_v2(void) { // PicoRAM Revision 2, 4 KBs RAM
       }
 
       while ( ! gpio_get(CE_INPUT) ) {__asm volatile(" nop\n\n");  }; 
+
       gpio_put(SEL1, 0);
       gpio_put(SEL2, 1);
       gpio_set_dir_masked(data_mask, 0);
-      
-    } else {
-
-      // low_adr = ((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) & 0b111111; // A0 - A5
-      low_adr = gpio_get_all(); 
-    
-    }
-  }
-
-}
-
-void main_et3400_exp_rom_io(void) { // PicoRAM Revision 2, 4 KBs RAM, IO Experiment 
-
-  read = false; 
-  written = false; 
-  confirmed = false; 
-
-  gpio_set_dir_masked(data_mask, 0);
-  gpio_put(SEL1, 0);
-  gpio_put(SEL2, 1);
-
-  reset_release();   
- 
-  while (true) {   
-
-    if (disabled ) {
-      gpio_put(LED_PIN, 1);
-      confirmed = true;
-      while (disabled ) {}; 
-    }
-
-    if ( ! gpio_get(CE_INPUT) && ! disabled ) { 
-
-      gpio_put(SEL1, 1);
-      gpio_put(SEL2, 0);
-
-      if (gpio_get(WE_INPUT) ) {
-
-	__asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
-	__asm volatile(" nop\n nop\n nop\n nop\n\n"); 	
-	high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
-	low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5 
-	m_adr = ( low_adr | high_adr ) & 0b111111111111;
-	
-                  
-        w_op = ram[cur_bank][m_adr]; 
-        gpio_set_dir_masked(data_mask, data_mask);
-        gpio_put_masked(data_mask, w_op << DATA_GPIO_START);
-
-
-      }  else {
-
-	__asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
-	__asm volatile(" nop\n nop\n nop\n nop\n\n"); 	
-	high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
-	low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5  
-	m_adr = ( low_adr | high_adr ) & 0b111111111111; 
-	r_op = (gpio_get_all() & data_mask) >> DATA_GPIO_START ;
-      
-	if (ACCEPT_NEXT_IO_BYTE) {
-	  if (m_adr == 0x0800) {
-	    IO_BYTE = r_op;
-	    IO_DETECTED = true; 	    
-	    ACCEPT_NEXT_IO_BYTE = false;
-	  }
-	}
-
-      }
-
-      while ( ! gpio_get(CE_INPUT) ) {__asm volatile(" nop\n\n");  }; 
-      gpio_put(SEL1, 0);
-      gpio_put(SEL2, 1);
-      gpio_set_dir_masked(data_mask, 0);
-      
+     
     } else {
 
       // low_adr = ((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) & 0b111111; // A0 - A5
@@ -3036,7 +2820,7 @@ void main_et3400a(void) { // Stock 2x 2114 512 Bytes
 	__asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
 	high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
 	low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5 */ 
-	m_adr = ( low_adr | high_adr ) & 0b000111111111;
+	m_adr = ( low_adr | high_adr ) & 0b011111111111;
 	
                   
         w_op = ram[cur_bank][m_adr]; 
@@ -3049,7 +2833,7 @@ void main_et3400a(void) { // Stock 2x 2114 512 Bytes
 	__asm volatile(" nop\n nop\n nop\n nop\n nop\n nop\n nop\n\n"); 	
 	high_adr = (((gpio_get_all() & addr_mask) >> ADR_INPUTS_START ) ) << 6; // A6 - A10
 	low_adr = ((low_adr & addr_mask) >> ADR_INPUTS_START ) ; // A0 - A5 */ 
-	m_adr = ( low_adr | high_adr ) & 0b000111111111; 
+	m_adr = ( low_adr | high_adr ) & 0b011111111111; 
 
       
         r_op = (gpio_get_all() & data_mask) >> DATA_GPIO_START ;
@@ -3584,8 +3368,7 @@ int main() {
   case ET3400_EXP_RAM_V1 :
   case ET3400_EXP_RAM_V2 :
   case ET3400_EXP_ROM_V1 :
-  case ET3400_EXP_ROM_V2 :
-  case ET3400_EXP_ROM_IO : multicore_launch_core1(display_loop_et3400); break;
+  case ET3400_EXP_ROM_V2 : multicore_launch_core1(display_loop_et3400); break;
     
   case ET3400A : 
   case ET3400A_EXP_RAM_V1 :
@@ -3624,10 +3407,9 @@ int main() {
 
   case ET3400 : main_et3400(); break; 
   case ET3400_EXP_RAM_V1 : main_et3400_exp_ram_v1(); break; 
-  case ET3400_EXP_RAM_V2 : main_et3400_exp_rom_v2(); break; 
+  case ET3400_EXP_RAM_V2 : main_et3400_exp_ram_v2(); break; 
   case ET3400_EXP_ROM_V1 : main_et3400_exp_rom_v1(); break; 
   case ET3400_EXP_ROM_V2 : main_et3400_exp_rom_v2(); break; 
-  case ET3400_EXP_ROM_IO : main_et3400_exp_rom_io(); break; 
     
   case ET3400A : main_et3400a(); break; 
   case ET3400A_EXP_RAM_V1 : main_et3400a_exp_ram_v1(); break; 

@@ -1,0 +1,1056 @@
+;
+; Towers of Hanoi for PicoRAM Ultimate Firmware V2.1 
+; Decoder: 4kb, 0x1000 - 0x1fff
+; IO Byte: 0x1800
+; 
+; CoPilot wrote large portions of this code,
+; based on my original Towers of Hanoi code.
+; Heathkit ET-3400 with PicoRAM Ultimate Rev. 2
+; 4 KBs; Machine type: 3400IO 
+; = ROM emulation from 0x1000 - 0x1fff
+; Writes to address 0x1800 -> send to PicoRAM
+; for text / graphics screen commands. 
+; 
+
+.ORG    $0000 
+
+; 
+; Firmwarwe ROM Routines 
+; 
+
+RESET       =       $fc00 
+INCH        =       $fdf4 
+ENCODE      =       $fdbb 
+OUTCH       =       $fe3a 
+OUTHEX      =       $fe28 
+OUTBYT      =       $fe20 
+OUTST1      =       $fe50 
+OUTST0      =       $fd8d 
+DSPLAY      =       $fd7b 
+IHB         =       $fe09 
+REDIS       =       $fcbc 
+
+DIGADD      =       $00f0 
+ZDIGADD     =       $00f0 
+
+; 
+; Scratch Memory RAM 
+; 
+
+            .ORG    $0000 
+
+ACOUNTER:   RMB     1 
+BCOUNTER:   RMB     1 
+
+X1:         RMB     1 
+Y1:         RMB     1 
+X2:         RMB     1 
+Y2:         RMB     1 
+
+DISC:       RMB     1 
+FROM:       RMB     1 
+TO:         RMB     1 
+
+
+; ------------------------------------------------------------
+; RAM VARIABLES
+; ------------------------------------------------------------
+
+DISC_LOCATION: RMB  1 ; $0A/$0B/$0C for A/B/C
+DISC_HEIGHT: RMB    1 ; 1..N (stack height)
+PEG_X:      RMB     1 
+HALF:       RMB     1 
+TEMP1:      RMB     1 
+INIT_COUNTER: RMB   1 
+
+
+TOPA:       RMB     1 ; top-most disc height on peg A
+TOPB:       RMB     1 ; top-most disc height on peg B
+TOPC:       RMB     1 ; top-most disc height on peg C
+
+; 
+; 
+; 
+
+IOBYTE:     RMB     1 
+
+
+
+            .ORG    $1000 
+
+; ===== Program Entry =====
+START:               
+            JSR     CLEARSCREEN 
+            JSR     LDelay 
+            JSR     LDelay 
+
+; "HOW MANY DISCS?" prompt (your existing text)
+            LDAA    #$23 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$44 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$49 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$53 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$43 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$53 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$3F 
+            STAA    IOBYTE 
+            JSR     printchar 
+
+; Ask for N, result in A
+            JSR     ASK 
+            STAA    TOPA ; TOPA = N (starting peg A)
+            CLRA     
+            STAA    TOPB ; TOPB = 0
+            STAA    TOPC ; TOPC = 0
+
+            JSR     CLEARSCREEN 
+            JSR     LDelay 
+            JSR     LDelay 
+
+; Draw initial tower on peg A
+            JSR     draw_initial_tower 
+            JSR     table_and_pegs 
+
+; Prepare initial HANOI(N, FROM="A", VIA="B", TO="C") frame
+            LDAA    TOPA ; N
+            PSHA     ; N   (5,X inside HANOI)
+            LDAA    #$0A ; FROM = "A"
+            PSHA     ; FROM (4,X)
+            LDAA    #$0B ; VIA  = "B"
+            PSHA     ; VIA  (3,X)
+            LDAA    #$0C ; TO   = "C"
+            PSHA     ; TO   (2,X)
+
+; For convenience, also set globals DISC/FROM/TO for first move
+            TSX      
+            LDAA    5,X ; N
+            STAA    DISC 
+            LDAA    4,X ; FROM
+            STAA    FROM 
+            LDAA    2,X ; TO
+            STAA    TO 
+
+            JSR     HANOI 
+            JSR     DONE 
+            JSR     INCH 
+
+            JMP     START 
+
+
+; ===== Recursive Subroutine: HANOI(N, FROM, VIA, TO) =====
+; Stack frame at entry (after JSR):
+;   0,X : return address low
+;   1,X : return address high
+;   2,X : TO
+;   3,X : VIA
+;   4,X : FROM
+;   5,X : N
+HANOI:               
+            TSX      
+            LDAA    5,X ; N
+            CMPA    #0 
+            BNE     RECURSE 
+            RTS      
+
+RECURSE:             
+            TSX      
+
+; --- First recursive call: HANOI(N-1, FROM, TO, VIA) ---
+            LDAA    5,X ; N
+            DECA     
+            PSHA     ; N-1
+
+            LDAA    4,X ; FROM
+            PSHA     ; FROM
+
+            LDAA    2,X ; TO
+            PSHA     ; TO
+
+            LDAA    3,X ; VIA
+            PSHA     ; VIA
+
+            JSR     HANOI 
+
+            PULA     ; VIA
+            PULA     ; TO
+            PULA     ; FROM
+            PULA     ; N-1
+
+; --- Perform the move: FROM -> TO for disc N ---
+            TSX      
+            LDAA    5,X ; N
+            STAA    DISC 
+            LDAA    4,X ; FROM
+            STAA    FROM 
+            LDAA    2,X ; TO
+            STAA    TO 
+
+            JSR     PRINT_MOVE 
+
+; --- Second recursive call: HANOI(N-1, VIA, FROM, TO) ---
+            TSX      
+            LDAA    5,X ; N
+            DECA     
+            PSHA     ; N-1
+
+            LDAA    3,X ; VIA
+            PSHA     ; FROM
+
+            LDAA    4,X ; FROM
+            PSHA     ; VIA
+
+            LDAA    2,X ; TO
+            PSHA     ; TO
+
+            JSR     HANOI 
+
+            PULA     ; TO
+            PULA     ; VIA
+            PULA     ; FROM
+            PULA     ; N-1
+
+            RTS      
+
+
+; ===== ASK: returns N in A (unchanged from your version) =====
+ASK:                 
+            JSR     REDIS 
+
+            LDAA    #$D1 
+            JSR     OUTBYT 
+
+            LDAA    #$5C 
+            JSR     OUTBYT 
+
+            JSR     INCH ; result in A
+            RTS      
+
+
+; ------------------------------------------------------------
+; compute_disc_geometry
+; Computes x1, x2, y1, y2 for the current disc.
+; Uses:
+;   disc_location : "A", "B", or "C" (0Ah, 0Bh, 0Ch)
+;   disc_height   : 1 = bottom disc, increasing upwards
+;   DISC          : disc index (1 = smallest, etc.)
+; Produces:
+;   x1, x2, y1, y2
+; ------------------------------------------------------------
+COMPUTE_DISC_GEOMETRY:  
+
+; ---- peg X center ----
+            LDAA    disc_location 
+            CMPA    #$0A 
+            BEQ     pegA 
+            CMPA    #$0B 
+            BEQ     pegB 
+; else C
+PEGC:       LDAA    #107 ; peg C center
+            BRA     peg_done 
+PEGA:       LDAA    #21 ; peg A center
+            BRA     peg_done 
+PEGB:       LDAA    #64 ; peg B center
+PEG_DONE:            
+            STAA    peg_x 
+
+; ---- vertical geometry ----
+; y2 = 30 - (disc_height - 1)*4
+; y1 = y2 - 4
+
+            LDAA    disc_height 
+            DECA     ; H-1
+            ASLA     ; *2
+            ASLA     ; *4
+            STAA    temp1 ; temp1 = (H-1)*4
+
+            LDAA    #30 
+            SUBA    temp1 ; y2 = 30 - (H-1)*4
+            STAA    y2 
+            SUBA    #4 ; y1 = y2 - 4
+            STAA    y1 
+
+; ---- half-width = 4 + (DISC-1)*3 ----
+            LDAA    DISC 
+            DECA     ; DISC-1
+            STAA    temp1 ; temp1 = DISC-1
+
+; temp1 = (DISC-1)*3
+            ASLA     ; temp1 = 2*(DISC-1)
+            ADDA    temp1 ; A = 3*(DISC-1)
+            STAA    temp1 
+
+            LDAA    #4 
+            ADDA    temp1 ; half = 4 + 3*(DISC-1)
+            STAA    half 
+
+; ---- x1 = peg_x - half ----
+            LDAA    peg_x 
+            SUBA    half 
+            STAA    x1 
+
+; ---- x2 = peg_x + half ----
+            LDAA    peg_x 
+            ADDA    half 
+            STAA    x2 
+
+            RTS      
+
+
+; ------------------------------------------------------------
+; draw_initial_tower
+; Draws all discs on peg A at startup.
+;   TOPA = N (number of discs)
+;   TOPB = 0, TOPC = 0
+;   Largest disc at bottom, smallest at top.
+; ------------------------------------------------------------
+DRAW_INITIAL_TOWER:  
+
+            LDAA    #$0A ; peg A
+            STAA    disc_location 
+
+            LDAA    TOPA ; N
+            STAA    init_counter ; counts from N down to 1
+
+DRAW_INIT_LOOP:      
+            LDAA    init_counter 
+            BEQ     draw_init_done 
+
+; disc_height = (TOPA - init_counter + 1)
+            LDAA    TOPA 
+            SUBA    init_counter 
+            INCA     
+            STAA    disc_height 
+
+; DISC = init_counter (largest first)
+            LDAA    init_counter 
+            STAA    DISC 
+
+            JSR     draw_disc 
+
+            DEC     init_counter 
+            BRA     draw_init_loop 
+
+DRAW_INIT_DONE:      
+            RTS      
+
+
+; ============================================================
+; PRINT_MOVE — graphics animation + peg bookkeeping
+; ============================================================
+PRINT_MOVE:          
+
+            JSR     print_move0 
+; 
+; ----------------------------------------------------
+; 1) UNDRAW disc from FROM peg
+; ----------------------------------------------------
+            LDAA    FROM 
+            STAA    disc_location 
+
+            CMPA    #$0A 
+            BEQ     UNDRAW_A 
+            CMPA    #$0B 
+            BEQ     UNDRAW_B 
+; else C
+UNDRAW_C:            
+            LDAA    TOPC 
+            STAA    disc_height 
+            JSR     undraw_disc 
+            DEC     TOPC 
+            BRA     UNDRAW_DONE 
+
+UNDRAW_A:            
+            LDAA    TOPA 
+            STAA    disc_height 
+            JSR     undraw_disc 
+            DEC     TOPA 
+            BRA     UNDRAW_DONE 
+
+UNDRAW_B:            
+            LDAA    TOPB 
+            STAA    disc_height 
+            JSR     undraw_disc 
+            DEC     TOPB 
+
+UNDRAW_DONE:         
+
+; ----------------------------------------------------
+; 2) DRAW disc on TO peg
+; ----------------------------------------------------
+            LDAA    TO 
+            STAA    disc_location 
+
+            CMPA    #$0A 
+            BEQ     DRAW_A 
+            CMPA    #$0B 
+            BEQ     DRAW_B 
+; else C
+DRAW_C:              
+            INC     TOPC 
+            LDAA    TOPC 
+            STAA    disc_height 
+            JSR     draw_disc 
+            BRA     DRAW_DONE 
+
+DRAW_A:              
+            INC     TOPA 
+            LDAA    TOPA 
+            STAA    disc_height 
+            JSR     draw_disc 
+            BRA     DRAW_DONE 
+
+DRAW_B:              
+            INC     TOPB 
+            LDAA    TOPB 
+            STAA    disc_height 
+            JSR     draw_disc 
+
+DRAW_DONE:           
+
+; ----------------------------------------------------
+; 3) Restore table + pegs (fix any erased peg segments)
+; ----------------------------------------------------
+            JSR     table_and_pegs 
+
+; ----------------------------------------------------
+; 4) Existing 7-seg + serial output (your code here)
+; ----------------------------------------------------
+            JSR     REDIS 
+; ... your OUTBYT / sendchar logic ...
+
+            RTS      
+
+; ------------------------------------------------------------
+; draw_disc — draws rectangle using DRAWLINE
+; ------------------------------------------------------------
+DRAW_DISC0:          
+            JSR     compute_disc_geometry 
+
+; Top edge
+            LDAA    y1 
+            STAA    Y1 
+            STAA    Y2 
+            LDAA    x1 
+            STAA    X1 
+            LDAA    x2 
+            STAA    X2 
+            JSR     DRAWLINE 
+
+; Bottom edge
+            LDAA    y2 
+            STAA    Y1 
+            STAA    Y2 
+            LDAA    x1 
+            STAA    X1 
+            LDAA    x2 
+            STAA    X2 
+            JSR     DRAWLINE 
+
+; Left edge
+            LDAA    x1 
+            STAA    X1 
+            STAA    X2 
+            LDAA    y1 
+            STAA    Y1 
+            LDAA    y2 
+            STAA    Y2 
+            JSR     DRAWLINE 
+
+; Right edge
+            LDAA    x2 
+            STAA    X1 
+            STAA    X2 
+            LDAA    y1 
+            STAA    Y1 
+            LDAA    y2 
+            STAA    Y2 
+            JSR     DRAWLINE 
+
+            RTS      
+
+
+; ------------------------------------------------------------
+; undraw_disc — erases rectangle using UNDRAWLINE
+; ------------------------------------------------------------
+UNDRAW_DISC0:        
+            JSR     compute_disc_geometry 
+
+; Top edge
+            LDAA    y1 
+            STAA    Y1 
+            STAA    Y2 
+            LDAA    x1 
+            STAA    X1 
+            LDAA    x2 
+            STAA    X2 
+            JSR     UNDRAWLINE 
+
+; Bottom edge
+            LDAA    y2 
+            STAA    Y1 
+            STAA    Y2 
+            LDAA    x1 
+            STAA    X1 
+            LDAA    x2 
+            STAA    X2 
+            JSR     UNDRAWLINE 
+
+; Left edge
+            LDAA    x1 
+            STAA    X1 
+            STAA    X2 
+            LDAA    y1 
+            STAA    Y1 
+            LDAA    y2 
+            STAA    Y2 
+            JSR     UNDRAWLINE 
+
+; Right edge
+            LDAA    x2 
+            STAA    X1 
+            STAA    X2 
+            LDAA    y1 
+            STAA    Y1 
+            LDAA    y2 
+            STAA    Y2 
+            JSR     UNDRAWLINE 
+
+            RTS      
+
+
+; ------------------------------------------------------------
+; table_and_pegs — draws table line + 3 vertical pegs
+; ------------------------------------------------------------
+TABLE_AND_PEGS:      
+
+; ---- table line at Y = 31 ----
+            LDAA    #31 
+            STAA    Y1 
+            STAA    Y2 
+            LDAA    #0 
+            STAA    X1 
+            LDAA    #127 
+            STAA    X2 
+            JSR     DRAWLINE 
+
+; ---- peg A at x = 21 ----
+            LDAA    #21 
+            STAA    X1 
+            STAA    X2 
+            LDAA    #8 
+            STAA    Y1 
+            LDAA    #30 
+            STAA    Y2 
+            JSR     DRAWLINE 
+
+; ---- peg B at x = 64 ----
+            LDAA    #64 
+            STAA    X1 
+            STAA    X2 
+            LDAA    #8 
+            STAA    Y1 
+            LDAA    #30 
+            STAA    Y2 
+            JSR     DRAWLINE 
+
+; ---- peg C at x = 107 ----
+            LDAA    #107 
+            STAA    X1 
+            STAA    X2 
+            LDAA    #8 
+            STAA    Y1 
+            LDAA    #30 
+            STAA    Y2 
+            JSR     DRAWLINE 
+
+            RTS      
+
+
+; ===== Display Subroutine =====
+; Inputs: TEMP = Disk, A = FROM, B = TO
+
+PRINT_MOVE0:         
+
+            LDAA    #0 
+            STAA    X1 
+            LDAA    #0 
+            STAA    Y1 
+            JSR     LOCATE
+	    
+            JSR     REDIS 
+
+            LDAA    DISC 
+            JSR     OUTBYT 
+
+            LDAA    FROM 
+            JSR     OUTBYT 
+
+            LDAA    TO 
+            JSR     OUTBYT 
+
+; 44 49 53 43 20 = DISC
+
+            LDAA    #$44 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$49 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$53 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$43 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$20 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    DISC 
+            ADDA    #$30 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+; ":"
+
+            LDAA    #$3a 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$20 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+; 
+
+            LDAA    FROM 
+            ADDA    #$37 ; $A -> "A"
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+; "->" = 2D 3E
+
+            LDAA    #$20 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$2d 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$3e 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$20 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    TO 
+            ADDA    #$37 
+            STAA    IOBYTE 
+            JSR     printchar 
+
+            RTS      
+
+
+DRAWLINE:            
+
+            LDAA    #$05 ; draw line command
+            JSR     EXEC 
+
+            LDAA    X1 
+            JSR     EXEC 
+
+            LDAA    Y1 
+            JSR     EXEC 
+
+            LDAA    X2 
+            JSR     EXEC 
+
+            LDAA    Y2 
+            JSR     EXEC 
+
+            JSR     Ldelay 
+
+            RTS      
+
+LOCATE:              
+
+            LDAA    #$04 ; locate x, y command
+            JSR     EXEC 
+
+            LDAA    X1 
+            JSR     EXEC 
+
+            LDAA    Y1 
+            JSR     EXEC 
+
+            JSR     Ldelay 
+
+            RTS      
+
+UNDRAWLINE:          
+
+            LDAA    #$09 ; draw line command
+            JSR     EXEC 
+
+            LDAA    X1 
+            JSR     EXEC 
+
+            LDAA    Y1 
+            JSR     EXEC 
+
+            LDAA    X2 
+            JSR     EXEC 
+
+            LDAA    Y2 
+            JSR     EXEC 
+
+;jsr INCH
+            JSR     Ldelay 
+
+            RTS      
+
+
+CLEARSCREEN:         
+
+            PSHA     
+            LDAA    #$00 ; clear screen command
+            JSR     EXEC 
+            PULA     
+
+            RTS      
+
+
+CLEARLINE:           
+
+            PSHA     
+            LDAA    #$08 ; newline command
+            JSR     EXEC 
+            PULA     
+
+            RTS      
+
+NEWLINE:             
+
+            PSHA     
+            LDAA    #$01 ; newline command
+            JSR     EXEC 
+            PULA     
+
+            RTS      
+
+SENDCHAR:            
+
+            PSHA     
+
+            LDAA    #$06 
+            JSR     EXEC 
+
+            LDAA    IOBYTE 
+            JSR     EXEC 
+
+            PULA     
+
+            JSR     Delay 
+
+            RTS      
+
+
+PRINTLINE:           
+
+            PSHA     
+
+            LDAA    #$07 
+            JSR     EXEC 
+
+            LDAA    IOBYTE 
+            JSR     EXEC 
+
+            PULA     
+
+            JSR     Delay 
+
+            RTS      
+
+
+PRINTCHAR0:          
+
+            PSHA     
+
+            LDAA    #$03 
+            JSR     EXEC 
+
+            LDAA    IOBYTE 
+            JSR     EXEC 
+
+            PULA     
+
+            JSR     Delay 
+
+            RTS      
+
+
+PRINTCHAR:           
+
+            PSHA     
+
+            LDAA    #$02 
+            JSR     EXEC 
+
+            LDAA    IOBYTE 
+            JSR     EXEC 
+
+            PULA     
+
+            JSR     Delay 
+
+            RTS      
+
+
+EXEC:                
+
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+
+
+            STAA    $1800 
+
+
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            NOP      
+            JSR     Delay 
+
+            RTS      
+
+
+DELAY:               
+            PSHA     ; save A
+            PSHB     ; save B
+
+            LDAA    #$02 ; outer loop count
+OUTER:      LDAB    #$FF ; inner loop count
+
+INNER:      DECB     ; 2 cycles
+            BNE     Inner ; 3 (taken), 2 (final)
+
+            DECA     ; 2 cycles
+            BNE     Outer ; 3 (taken), 2 (final)
+
+            PULB     
+            PULA     
+            RTS      
+
+
+LDELAY:              
+            PSHA     ; save A
+            PSHB     ; save B
+
+            LDAA    #$05 ; outer loop count
+LOUTER:     LDAB    #$FF ; inner loop count
+
+LINNER:     DECB     ; 2 cycles
+            BNE     LInner ; 3 (taken), 2 (final)
+
+            DECA     ; 2 cycles
+            BNE     LOuter ; 3 (taken), 2 (final)
+
+            PULB     
+            PULA     
+            RTS      
+
+
+
+DONE:       JSR     OUTST0 
+            FCB     $08,$08,$08,$08,$08,$88 
+
+; 44 4F 4E 45 21
+
+            LDAA    #0 
+            STAA    X1 
+            LDAA    #0 
+            STAA    Y1 
+
+            JSR     LOCATE 
+
+            LDAA    #$44 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$4f 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$4e 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$45 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    #$21 
+            STAA    IOBYTE 
+            JSR     printchar0 
+
+            LDAA    32 
+            STAA    IOBYTE 
+            JSR     printchar0 
+            LDAA    32 
+            STAA    IOBYTE 
+            JSR     printchar0 
+            LDAA    32 
+            STAA    IOBYTE 
+            JSR     printchar0 
+            LDAA    32 
+            STAA    IOBYTE 
+            JSR     printchar0 
+            LDAA    32 
+            STAA    IOBYTE 
+            JSR     printchar0 
+            LDAA    32 
+            STAA    IOBYTE 
+            JSR     printchar0 
+            LDAA    32 
+            STAA    IOBYTE 
+            JSR     printchar0 
+            LDAA    32 
+            STAA    IOBYTE 
+            JSR     printchar0 
+            LDAA    32 
+            STAA    IOBYTE 
+            JSR     printchar0 
+            LDAA    32 
+            STAA    IOBYTE 
+            JSR     printchar0 
+            LDAA    32 
+            STAA    IOBYTE 
+            JSR     printchar 
+
+            RTS      
+
+
+; ------------------------------------------------------------
+; draw_disc
+; Draws a disc three pixels thick using geometry from
+; compute_disc_geometry.
+; ------------------------------------------------------------
+DRAW_DISC:           
+            JSR     compute_disc_geometry 
+
+; ---- line 1: y = y1 ----
+            LDAA    y1 
+            STAA    Y1 
+            STAA    Y2 
+            LDAA    x1 
+            STAA    X1 
+            LDAA    x2 
+            STAA    X2 
+            JSR     DRAWLINE 
+
+; ---- line 2: y = y1 + 1 ----
+            LDAA    y1 
+            INCA     
+            STAA    Y1 
+            STAA    Y2 
+            LDAA    x1 
+            STAA    X1 
+            LDAA    x2 
+            STAA    X2 
+            JSR     DRAWLINE 
+
+; ---- line 3: y = y1 + 2 ----
+            LDAA    y1 
+            INCA     
+            STAA    Y1 
+            STAA    Y2 
+            LDAA    x1 
+            STAA    X1 
+            LDAA    x2 
+            STAA    X2 
+            JSR     DRAWLINE 
+
+            RTS      
+
+; ------------------------------------------------------------
+; undraw_disc
+; Erases a disc three pixels thick using geometry from
+; compute_disc_geometry.
+; ------------------------------------------------------------
+UNDRAW_DISC:         
+            JSR     compute_disc_geometry 
+
+; ---- line 1: y = y1 ----
+            LDAA    y1 
+            STAA    Y1 
+            STAA    Y2 
+            LDAA    x1 
+            STAA    X1 
+            LDAA    x2 
+            STAA    X2 
+            JSR     UNDRAWLINE 
+
+; ---- line 2: y = y1 + 1 ----
+            LDAA    y1 
+            INCA     
+            STAA    Y1 
+            STAA    Y2 
+            LDAA    x1 
+            STAA    X1 
+            LDAA    x2 
+            STAA    X2 
+            JSR     UNDRAWLINE 
+
+; ---- line 3: y = y1 + 2 ----
+            LDAA    y1 
+            INCA     
+            STAA    Y1 
+            STAA    Y2 
+            LDAA    x1 
+            STAA    X1 
+            LDAA    x2 
+            STAA    X2 
+            JSR     UNDRAWLINE 
+
+            RTS      
+
