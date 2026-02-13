@@ -21,7 +21,7 @@
 //
 //
 
-#define VERSION "v2.2 02-09-2026"
+#define VERSION "v2.1 02-08-2026"
 
 //
 // Supported Machines
@@ -37,9 +37,7 @@ typedef enum {
   SEND_CHAR,   // 1 arg, send char to text buffer 
   PRINT_LINE,  // 0 args, prints at line 4, scrolls up 
   CLEAR_LINE0, // 0 arg, fills rem. after send char with 32 
-  UNLINE,      // UNDRAW LINE (x1,y1) - (x2,y2), 4 args
-  PLOT0,       // plot (x,y,col), 3 args
-  PLOT         // plot (x,y,col), 3 args, update screen
+  UNLINE       // UNDRAW LINE (x1,y1) - (x2,y2), 4 args
 
 } IO_COMMAND_TYPE;
 
@@ -766,8 +764,6 @@ void display_loop_et3400() {
 	case PRINT : 
 	case PRINT0 : IO_BYTES_REM = 1; IO_COMMAND = IO_BYTE; break; 
 	case LOCATE : IO_BYTES_REM = 2; IO_COMMAND = IO_BYTE; break; 
-	case PLOT0 : 
-	case PLOT : IO_BYTES_REM = 3; IO_COMMAND = IO_BYTE; break; 
 	case LINE   : 
 	case UNLINE  : IO_BYTES_REM = 4; IO_COMMAND = IO_BYTE; break; 
 	case SEND_CHAR : IO_BYTES_REM = 1; IO_COMMAND = IO_BYTE; break; 
@@ -797,8 +793,6 @@ void display_loop_et3400() {
 	  switch (IO_COMMAND) {
   	  case PRINT : print_char(CUR_X++, CUR_Y, IO_BYTE); break; 
 	  case PRINT0 : print_char0(CUR_X++, CUR_Y, IO_BYTE); break;  
-  	  case PLOT : if (IO_BYTE % 2) disp_plot(CUR_X, CUR_Y); else undisp_plot(CUR_X, CUR_Y); break;  
-	  case PLOT0 : if (IO_BYTE % 2) disp_plot0(CUR_X, CUR_Y); else undisp_plot0(CUR_X, CUR_Y); break;  
 	  case LOCATE : CUR_Y = IO_BYTE; break;  
 	  case LINE : CUR_Y2 = IO_BYTE; disp_line(CUR_X1, CUR_Y1, CUR_X2, CUR_Y2); break;
 	  case UNLINE : CUR_Y2 = IO_BYTE; undisp_line(CUR_X1, CUR_Y1, CUR_X2, CUR_Y2); break;
@@ -809,18 +803,14 @@ void display_loop_et3400() {
 	  //render_display(); 
 
 	} else if (IO_BYTES_REM == 1) {
-	  switch (IO_COMMAND) {
-	  case PLOT :
-    	  case PLOT0 : CUR_Y = IO_BYTE; break; 	    
+	  switch (IO_COMMAND) {	    
     	  case LOCATE : CUR_X = IO_BYTE; break; 
     	  case LINE : 
     	  case UNLINE : CUR_X2 = IO_BYTE; break; 
 	  default : break; 
 	  }
 	} else if (IO_BYTES_REM == 2) {
-	  switch (IO_COMMAND) {
-	  case PLOT :
-    	  case PLOT0 : CUR_X = IO_BYTE; break; 	    
+	  switch (IO_COMMAND) {	    
     	  case LINE : 
     	  case UNLINE : CUR_Y1 = IO_BYTE; break; 
 	  default : break; 

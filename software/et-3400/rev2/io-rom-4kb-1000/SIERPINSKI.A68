@@ -1,0 +1,292 @@
+;
+; Largely written by Copilot, with some help by Michael Wessel
+; 2/12/2026 (i.e., to get the display "shearing" right - it was stuck there)
+;
+
+; =========================================================
+; Firmware ROM Routines (ET‑3400 Monitor)
+; =========================================================
+
+RESET       = $FC00
+INCH        = $FDF4
+ENCODE      = $FDBB
+OUTCH       = $FE3A
+OUTHEX      = $FE28
+OUTBYT      = $FE20
+OUTST1      = $FE50
+OUTST0      = $FD8D
+DSPLAY      = $FD7B
+REDIS       = $FCBC
+
+
+; =========================================================
+; ET‑3400 + 128×32 OLED
+; Sierpinski fractal using logical coordinates (LX, LY)
+; Display shear applied only during plotting:
+;
+;     ScreenX = LX + (LY >> 1)
+;     ScreenY = LY
+;
+; This preserves the pure Sierpinski logic (LX & LY == 0)
+; while visually tilting the triangle on the OLED.
+;
+; Variables at $0100, code at $1000
+; =========================================================
+
+            ORG   $0100
+
+; -----------------------------
+; Logical fractal coordinates
+; -----------------------------
+LX:         RMB   1      ; logical X coordinate
+LY:         RMB   1      ; logical Y coordinate
+
+; -----------------------------
+; Screen coordinates (after shear)
+; -----------------------------
+SX:         RMB   1      ; screen X = LX + (LY >> 1)
+SY:         RMB   1      ; screen Y = LY
+
+COL:        RMB   1      ; pixel color (0xFF = on)
+
+
+; -----------------------------
+; Temporary scratch
+; -----------------------------
+T1:         RMB   1      ; holds LY >> 1
+
+
+; =========================================================
+; CODE SECTION
+; =========================================================
+            ORG   $1000
+
+
+; ---------------------------------------------------------
+; MAIN — Sierpinski in logical space, sheared only in plotting
+; ---------------------------------------------------------
+MAIN:
+            JSR   CLEARSCREEN
+            JSR   INCH
+
+            CLR   LY          ; start at logical Y = 0
+
+Y_LOOP:
+            CLR   LX          ; start each row at logical X = 0
+
+X_LOOP:
+; ---------------------------------------------------------
+; Sierpinski test in logical space:
+;     (LX & LY) == 0  → pixel is part of the fractal
+; ---------------------------------------------------------
+            LDAA  LX
+            ANDA  LY
+            BNE   SKIP_PLOT   ; if nonzero → skip pixel
+
+; ---------------------------------------------------------
+; Compute screen coordinates:
+;
+;   SX = LX + (LY >> 1)
+;   SY = LY
+;
+; This applies a gentle shear to the right, visually
+; turning the square-grid Sierpinski into a triangular one.
+; ---------------------------------------------------------
+            LDAA  LY
+            LSRA               ; LY >> 1
+            STAA  T1           ; T1 = LY/2
+
+            LDAA  LX
+            ADDA  T1           ; SX = LX + (LY/2)
+            STAA  SX
+
+            LDAA  LY
+            STAA  SY           ; SY = LY
+
+; ---------------------------------------------------------
+; Plot pixel at (SX, SY)
+; ---------------------------------------------------------
+            LDAA  #$FF
+            STAA  COL
+            JSR   PLOTNU       ; your non-updating plot routine
+
+SKIP_PLOT:
+; ---------------------------------------------------------
+; Advance logical X
+; ---------------------------------------------------------
+            INC   LX
+            LDAA  LX
+            CMPA  #128
+            BCS   X_LOOP       ; continue while LX < 128
+
+; ---------------------------------------------------------
+; Advance logical Y
+; ---------------------------------------------------------
+            INC   LY
+            LDAA  LY
+            CMPA  #32
+            BCS   CONT         ; continue while LY < 32
+
+; ---------------------------------------------------------
+; Finished — start over after keypress
+; ---------------------------------------------------------
+DONE:
+            JSR INCH
+	    JSR MAIN
+
+; ---------------------------------------------------------
+; End-of-row housekeeping
+; ---------------------------------------------------------
+CONT:
+            JSR   PLOT         ; your update/refresh routine
+            BCS   Y_LOOP       ; branch always (BCS always true after JSR)
+
+
+; ---------------------------------------------------------
+; CLEARSCREEN
+; ---------------------------------------------------------
+CLEARSCREEN:
+        PSHA
+        LDAA  #$00
+        JSR   EXEC
+        PULA
+        
+        JSR LDELAY
+        JSR LDELAY 
+        
+        RTS
+
+
+; ---------------------------------------------------------
+; PLOTNU — high-level plot using EXEC, NO UPDATE
+; ---------------------------------------------------------
+PLOTNU:
+        LDAA  #$0A
+        JSR   EXEC
+
+        LDAA  sx
+        JSR   EXEC
+
+        LDAA  sy
+        JSR   EXEC
+
+        LDAA  col
+        JSR   EXEC
+
+        JSR   DELAY
+        RTS
+
+
+; ---------------------------------------------------------
+; PLOT — high-level plot using EXEC, WITH SCREEN UPDATE
+; ---------------------------------------------------------
+PLOT:
+        LDAA  #$0B
+        JSR   EXEC
+
+        LDAA  sx
+        JSR   EXEC
+
+        LDAA  sy
+        JSR   EXEC
+
+        LDAA  col
+        JSR   EXEC
+
+        JSR   LDELAY
+        RTS
+
+
+; ---------------------------------------------------------
+; PLOT0 — disp pixel output
+; ---------------------------------------------------------
+PLOT0:
+        JSR   REDIS
+
+        LDAA  sx
+        JSR   OUTBYT
+
+        LDAA  sy
+        JSR   OUTBYT
+
+        LDAA  col
+        JSR   OUTBYT
+
+        RTS
+
+
+; ---------------------------------------------------------
+; EXEC — write A to $1800 with timing
+; ---------------------------------------------------------
+EXEC:
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+
+        STAA  $1800
+
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        JSR   DELAY
+
+        RTS
+
+
+; ---------------------------------------------------------
+; DELAY — coarse delay
+; ---------------------------------------------------------
+DELAY:
+        PSHA
+        PSHB
+
+        LDAA  #$01
+OUTER:  LDAB  #$FF
+
+INNER:  DECB
+        BNE   INNER
+
+        DECA
+        BNE   OUTER
+
+        PULB
+        PULA
+        RTS
+
+
+; ---------------------------------------------------------
+; LDELAY — longer delay
+; ---------------------------------------------------------
+LDELAY:
+        PSHA
+        PSHB
+
+        LDAA  #$05
+LOUTER: LDAB  #$FF
+
+LINNER: DECB
+        BNE   LINNER
+
+        DECA
+        BNE   LOUTER
+
+        PULB
+        PULA
+        RTS
+
