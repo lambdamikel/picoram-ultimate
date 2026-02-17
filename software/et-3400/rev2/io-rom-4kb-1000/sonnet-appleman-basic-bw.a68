@@ -1,0 +1,415 @@
+; Coded by Claude Sonnet 4.5 2/16/2026
+; High-Level Guidance by M.Wessel aka LambdaMikel
+
+; =========================================================
+; Mandelbrot Fractal for ET-3400 with SIGNED multiplication
+; =========================================================
+RESET       =       $FC00 
+OUTBYT      =       $FE20 
+REDIS       =       $FCBC 
+
+        ORG     $0100
+
+MPLIER  EQU     $0140
+MPCAND  EQU     $0142
+RESULT  EQU     $0144
+BITCNT  EQU     $0148
+TEMP    EQU     $0150
+SIGN    EQU     $0154
+
+ZR      EQU     $0160
+ZI      EQU     $0162
+CR      EQU     $0164
+CI      EQU     $0166
+ZR2     EQU     $0168
+ZI2     EQU     $016A
+TEMP1   EQU     $016C
+ITER    EQU     $016E
+XPOS    EQU     $016F
+YPOS    EQU     $0170
+COL     EQU     $0171
+
+        ORG     $1000
+
+MAIN:
+        JSR     CLEARSCREEN
+        CLR     YPOS
+YLOOP:
+        CLR     XPOS
+XLOOP:
+        ; X to CR (unsigned conversion)
+        LDAA    XPOS
+        STAA    MPLIER+1
+        CLR     MPLIER
+        CLR     MPCAND
+        LDAA    #$06
+        STAA    MPCAND+1
+        JSR     UMPY16          ; Use UNSIGNED for coordinate conversion
+        CLC
+        LDAA    RESULT+3
+        STAA    CR+1
+        LDAA    RESULT+2
+        ADCA    #$FE
+        STAA    CR
+        
+        ; Y to CI (unsigned conversion)
+        LDAA    YPOS
+        STAA    MPLIER+1
+        CLR     MPLIER
+        CLR     MPCAND
+        LDAA    #$10
+        STAA    MPCAND+1
+        JSR     UMPY16          ; Use UNSIGNED for coordinate conversion
+        CLC
+        LDAA    RESULT+3
+        STAA    CI+1
+        LDAA    RESULT+2
+        ADCA    #$FF
+        STAA    CI
+        
+        JSR     MANDEL
+        
+        LDAA    ITER
+        CMPA    #$08
+        BCS     SETCOL0
+        LDAA    #$01
+        BRA     SETCOLD
+SETCOL0:
+        LDAA    #$00
+SETCOLD:
+        STAA    COL
+        
+        JSR     PLOT0
+        JSR     PLOT
+        
+        INC     XPOS
+        LDAA    XPOS
+        CMPA    #$80
+        BCC     NXTY
+        JMP     XLOOP
+        
+NXTY:
+        INC     YPOS
+        LDAA    YPOS
+        CMPA    #$20
+        BCC     DONE
+        JMP     YLOOP
+        
+DONE:
+        BRA     MAIN
+
+MANDEL:
+        CLR     ZR
+        CLR     ZR+1
+        CLR     ZI
+        CLR     ZI+1
+        CLR     ITER
+        
+MITER:
+        ; ZR² = ZR × ZR (signed)
+        LDAA    ZR
+        STAA    MPLIER
+        LDAA    ZR+1
+        STAA    MPLIER+1
+        LDAA    ZR
+        STAA    MPCAND
+        LDAA    ZR+1
+        STAA    MPCAND+1
+        JSR     SMPY16
+        LDAA    RESULT+1
+        STAA    ZR2
+        LDAA    RESULT+2
+        STAA    ZR2+1
+        
+        ; ZI² = ZI × ZI (signed)
+        LDAA    ZI
+        STAA    MPLIER
+        LDAA    ZI+1
+        STAA    MPLIER+1
+        LDAA    ZI
+        STAA    MPCAND
+        LDAA    ZI+1
+        STAA    MPCAND+1
+        JSR     SMPY16
+        LDAA    RESULT+1
+        STAA    ZI2
+        LDAA    RESULT+2
+        STAA    ZI2+1
+        
+        ; Check escape: ZR² + ZI² >= 4.0 ($0400)
+        CLC
+        LDAA    ZR2+1
+        ADDA    ZI2+1
+        STAA    TEMP1+1
+        LDAA    ZR2
+        ADCA    ZI2
+        STAA    TEMP1
+        CMPA    #$04
+        BCC     ESCAPE
+        
+CONT:
+        ; New ZI = 2×ZR×ZI + CI (signed)
+        LDAA    ZR
+        STAA    MPLIER
+        LDAA    ZR+1
+        STAA    MPLIER+1
+        LDAA    ZI
+        STAA    MPCAND
+        LDAA    ZI+1
+        STAA    MPCAND+1
+        JSR     SMPY16
+        ; Multiply by 2: shift 32-bit result left by 1
+        ASL     RESULT+3
+        ROL     RESULT+2
+        ROL     RESULT+1
+        ROL     RESULT
+        ; Now extract bits 23-8 (RESULT+1 and RESULT+2)
+        LDAA    RESULT+1        ; High byte
+        STAA    TEMP1
+        LDAA    RESULT+2        ; Low byte
+        STAA    TEMP1+1
+        CLC
+        LDAA    TEMP1+1
+        ADDA    CI+1
+        STAA    ZI+1
+        LDAA    TEMP1
+        ADCA    CI
+        STAA    ZI
+        
+        ; New ZR = ZR² - ZI² + CR (signed subtraction)
+        LDAA    ZR2+1
+        SUBA    ZI2+1
+        STAA    TEMP1+1
+        LDAA    ZR2
+        SBCA    ZI2
+        STAA    TEMP1
+        CLC
+        LDAA    TEMP1+1
+        ADDA    CR+1
+        STAA    ZR+1
+        LDAA    TEMP1
+        ADCA    CR
+        STAA    ZR
+        
+        INC     ITER
+        LDAA    ITER
+        CMPA    #$20
+        BEQ     ESCAPE
+        JMP     MITER
+        
+ESCAPE:
+        RTS
+
+;=======================================================================
+; Signed 16x16=32 Multiplication
+;=======================================================================
+SMPY16:
+        CLR     SIGN
+        
+        ; Check if MPLIER is negative
+        LDAA    MPLIER
+        BPL     MPLR_POS
+        INC     SIGN
+        JSR     NEG_MPLIER
+        
+MPLR_POS:
+        ; Check if MPCAND is negative
+        LDAA    MPCAND
+        BPL     MPCD_POS
+        LDAA    SIGN
+        EORA    #$01
+        STAA    SIGN
+        JSR     NEG_MPCAND
+        
+MPCD_POS:
+        JSR     UMPY16
+        
+        LDAA    SIGN
+        BEQ     SIGN_DONE
+        JSR     NEG_RESULT
+        
+SIGN_DONE:
+        RTS
+
+NEG_MPLIER:
+        LDAA    MPLIER
+        COMA
+        STAA    MPLIER
+        LDAA    MPLIER+1
+        COMA
+        STAA    MPLIER+1
+        LDAA    MPLIER+1
+        ADDA    #$01
+        STAA    MPLIER+1
+        LDAA    MPLIER
+        ADCA    #$00
+        STAA    MPLIER
+        RTS
+
+NEG_MPCAND:
+        LDAA    MPCAND
+        COMA
+        STAA    MPCAND
+        LDAA    MPCAND+1
+        COMA
+        STAA    MPCAND+1
+        LDAA    MPCAND+1
+        ADDA    #$01
+        STAA    MPCAND+1
+        LDAA    MPCAND
+        ADCA    #$00
+        STAA    MPCAND
+        RTS
+
+NEG_RESULT:
+        LDAA    RESULT
+        COMA
+        STAA    RESULT
+        LDAA    RESULT+1
+        COMA
+        STAA    RESULT+1
+        LDAA    RESULT+2
+        COMA
+        STAA    RESULT+2
+        LDAA    RESULT+3
+        COMA
+        STAA    RESULT+3
+        LDAA    RESULT+3
+        ADDA    #$01
+        STAA    RESULT+3
+        LDAA    RESULT+2
+        ADCA    #$00
+        STAA    RESULT+2
+        LDAA    RESULT+1
+        ADCA    #$00
+        STAA    RESULT+1
+        LDAA    RESULT
+        ADCA    #$00
+        STAA    RESULT
+        RTS
+
+UMPY16:
+        CLR     RESULT
+        CLR     RESULT+1  
+        CLR     RESULT+2
+        CLR     RESULT+3
+        CLR     TEMP
+        CLR     TEMP+1
+        LDAA    MPCAND
+        STAA    TEMP+2
+        LDAA    MPCAND+1
+        STAA    TEMP+3
+        LDAA    #$10
+        STAA    BITCNT
+MLOOP:
+        LDAA    MPLIER+1
+        ANDA    #$01
+        BEQ     NOADD
+        LDAA    RESULT+3
+        ADDA    TEMP+3
+        STAA    RESULT+3
+        LDAA    RESULT+2
+        ADCA    TEMP+2
+        STAA    RESULT+2
+        LDAA    RESULT+1
+        ADCA    TEMP+1
+        STAA    RESULT+1
+        LDAA    RESULT
+        ADCA    TEMP
+        STAA    RESULT
+NOADD:
+        LSR     MPLIER
+        ROR     MPLIER+1
+        ASL     TEMP+3
+        ROL     TEMP+2
+        ROL     TEMP+1
+        ROL     TEMP
+        DEC     BITCNT
+        BNE     MLOOP
+        RTS
+
+CLEARSCREEN:         
+        PSHA     
+        LDAA    #$00 
+        JSR     EXEC 
+        PULA     
+        JSR     LDELAY 
+        JSR     LDELAY 
+        RTS      
+
+PLOT:                
+        LDAA    #$0B 
+        JSR     EXEC 
+        LDAA    XPOS 
+        JSR     EXEC 
+        LDAA    YPOS 
+        JSR     EXEC 
+        LDAA    COL 
+        JSR     EXEC 
+        JSR     LDELAY 
+        RTS      
+
+PLOT0:               
+        JSR     REDIS 
+        LDAA    XPOS 
+        JSR     OUTBYT 
+        LDAA    YPOS 
+        JSR     OUTBYT 
+        LDAA    COL 
+        JSR     OUTBYT 
+        RTS      
+
+EXEC:                
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        STAA    $1800 
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        NOP      
+        JSR     DELAY 
+        RTS      
+
+DELAY:
+        PSHB
+        PSHA
+        LDAA    #$10
+DLY1:   LDAB    #$FF
+DLY2:   DECB
+        BNE     DLY2
+        DECA
+        BNE     DLY1
+        PULA
+        PULB
+        RTS
+
+LDELAY:              
+        PSHA     
+        PSHB     
+        LDAA    #$05 
+LOUTER: LDAB    #$FF 
+LINNER: DECB     
+        BNE     LINNER 
+        DECA     
+        BNE     LOUTER 
+        PULB     
+        PULA     
+        RTS      
+
+        END
+	

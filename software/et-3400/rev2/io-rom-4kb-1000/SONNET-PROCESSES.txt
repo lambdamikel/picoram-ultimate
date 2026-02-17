@@ -1,0 +1,76 @@
+Can you summarize all the challenges we had to overcome to achieve this masterpiece?
+
+What a journey! Here's a summary of everything we overcame:
+
+---
+
+## The Road to Mandelbrot on the ET-3400
+
+### 🔧 Phase 1: The Multiplication Routine
+The foundation of everything - a 16×16=32 bit unsigned multiply:
+
+- **Carry flag pollution** between operations corrupted multi-byte shifts
+- **Shift order bug**: LSR vs ROR on high/low bytes was backwards
+- **16-bit TEMP overflow**: shifting a 16-bit multiplicand left 16 times loses bits - fixed by making TEMP a full **32-bit variable**
+- **Byte extraction**: result is in RESULT+2:RESULT+3, not RESULT+1:RESULT+2
+- **Test 2 always failed** (1000×2000) while others passed - classic sign that only specific bit patterns revealed the bug
+
+### 🖥️ Phase 2: Display Integration
+Integrating with the ET-3400 Appleman display:
+
+- **Wrong register passing**: initially tried to pass XPOS/YPOS in CPU registers, but PLOT/PLOT0 read from **memory variables**
+- **PLOT vs PLOT0 misunderstanding**: thought they were color variants, actually PLOT0 = LED display, PLOT = pixel screen - **both must always be called**
+- **Loop bounds crash at X=$80**: used BNE instead of BCC/BCS for unsigned comparison - $80 has bit 7 set which confused signed branch logic
+- **Branch out of range**: BNE MITER was too far away for a relative branch - replaced with JMP MITER
+
+### 📐 Phase 3: Coordinate Conversion
+Mapping screen pixels to the complex plane:
+
+- **Wrong scale factors**: used $18 for X (should be $06) and $08 for Y (should be $10)
+- **Wrong byte extraction**: took RESULT+1:RESULT+2 instead of RESULT+2:RESULT+3 for coordinate scaling
+- **Addition byte order**: adding the -2.0 and -1.0 offsets was in wrong byte order
+- **Signed vs unsigned**: used SMPY16 for coordinate conversion when XPOS/YPOS are unsigned - should use UMPY16
+
+### 🔢 Phase 4: Fixed-Point Arithmetic
+Getting 8.8 fixed-point math right:
+
+- **Wrong result bytes for squaring**: when multiplying two 8.8 numbers, result is 16.16 - need bits 23-8 (RESULT+1:RESULT+2), not RESULT+2:RESULT+3
+- **Multiply-by-2 bug**: was shifting individual bytes with ASLA/ROLA instead of shifting the full 32-bit result before extracting
+- **Signed arithmetic**: the Mandelbrot formula requires signed multiplication - our unsigned routine gave completely wrong results for negative numbers like ZR=-0.5
+
+### ✏️ Phase 5: Escape Test Logic
+The classic carry flag confusion:
+
+- **BCS vs BCC confusion**: spent many iterations getting this backwards - on the 6800, CMPA sets C=1 when A≥M (no borrow), C=0 when A<M (borrow occurs)
+- **Both branches present**: had both BCS and BCC after CMPA which meant one always executed, creating an infinite loop
+- **Wrong threshold**: used $05 instead of $04 for the escape radius of 4.0
+- **Escape vs Continue reversed**: multiple times had the branch logic exactly backwards
+
+### 🔄 Phase 6: Signed Multiplication
+Building SMPY16 for proper signed arithmetic:
+
+- **Sign determination**: XOR of input signs determines output sign
+- **Two's complement negation**: for each input separately, then for the 32-bit result
+- **Correct integration**: using SMPY16 for all Mandelbrot calculations, UMPY16 for coordinate conversion
+
+### 🐛 General Debugging Challenges
+- **Phantom memory corruption**: spent enormous time suspecting monitor was corrupting variables - turned out to be algorithm bugs
+- **Stack overflow from diagnostics**: too many nested JSR calls in diagnostic code caused crashes
+- **Out-of-range branches**: multiple BNE/BCS/BCC instructions that were too far from their targets
+- **Diagnostic delays too short**: repeatedly couldn't read the display before it changed
+- **Red herrings**: many times we were fixing the wrong thing while the real bug lurked elsewhere
+
+---
+
+## The Final Achievement 🎉
+
+After all that, the ET-3400 successfully rendered the **Mandelbrot set** using:
+- Custom **signed 16×16=32 bit** multiplication
+- **8.8 fixed-point** arithmetic
+- Proper **coordinate mapping** from 128×32 pixels to the complex plane
+- **Dithered shading** for pseudo-grayscale appearance
+
+All on a **1976 MC-6800 processor** running at ~1MHz with less than 1KB of RAM!
+
+That's a genuine masterpiece! 🏆
+

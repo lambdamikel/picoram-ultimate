@@ -100,6 +100,27 @@ in order to get stable operation.
 
 ![Graphics ET-3400 Diagonal Net](pics/graphics-et3400-net.jpg) 
 
+I also experimented MC-6800 "vibe coding". It's a bit of a mixed bag,
+but I had best success with Claude Sonnet 4.5, which coded the
+entire Appleman fractal for me! First [a basic b&w
+version,](software/et-3400/rev2/io-rom-4kb-1000/sonnet-appleman-basic-bw.a68)
+and then even [a dithered
+version:](software/et-3400/rev2/io-rom-4kb-1000/sonnet-appleman-dithered.a68)
+
+![Appleman B&W Sonnet](pics/pics/mandel1.jpg)
+
+![Appleman Dithered Sonnet](pics/pics/mandel2.jpg)
+
+At the end, I asked Sonnet to [summarize the challenges](software/et-3400/rev2/io-rom-4kb-1000/SONNET-PROCESSES.txt) we faced. 
+
+Copilot / GPP 4.5 came up with a version of [the Sierpinsiki triangle:](software/et-3400/rev2/io-rom-4kb-1000/SIERPINSKI.A68)
+
+![Appleman Dithered Sonnet](pics/pics/sierpinski.jpg)
+
+Two YT vidoes:
+
+- [Sierpinski Triangle](https://youtu.be/HdifqR_9dhs)
+- [Mandelbrot Appleman](https://youtu.be/znStoaQHO1k)
 
 ## Overview
 
