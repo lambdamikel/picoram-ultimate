@@ -109,13 +109,13 @@ version:](software/et-3400/rev2/io-rom-4kb-1000/sonnet-appleman-dithered.a68)
 
 ![Appleman B&W Sonnet](pics/mandel1.jpg)
 
-![Appleman Dithered Sonnet](pics/mandel2.jpg)
+![Appleman Dithered Sonnet](pics/mandel2.JPG)
 
 At the end, I asked Sonnet to [summarize the challenges](software/et-3400/rev2/io-rom-4kb-1000/SONNET-PROCESSES.txt) we faced. 
 
 Copilot / GPP 4.5 came up with a version of [the Sierpinsiki triangle:](software/et-3400/rev2/io-rom-4kb-1000/SIERPINSKI.A68)
 
-![Appleman Dithered Sonnet](pics/pics/sierpinski.jpg)
+![Appleman Dithered Sonnet](pics/sierpinski.jpg)
 
 Two YT vidoes:
 
