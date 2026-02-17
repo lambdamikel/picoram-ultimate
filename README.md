@@ -107,9 +107,9 @@ version,](software/et-3400/rev2/io-rom-4kb-1000/sonnet-appleman-basic-bw.a68)
 and then even [a dithered
 version:](software/et-3400/rev2/io-rom-4kb-1000/sonnet-appleman-dithered.a68)
 
-![Appleman B&W Sonnet](pics/pics/mandel1.jpg)
+![Appleman B&W Sonnet](pics/mandel1.jpg)
 
-![Appleman Dithered Sonnet](pics/pics/mandel2.jpg)
+![Appleman Dithered Sonnet](pics/mandel2.jpg)
 
 At the end, I asked Sonnet to [summarize the challenges](software/et-3400/rev2/io-rom-4kb-1000/SONNET-PROCESSES.txt) we faced. 
 
