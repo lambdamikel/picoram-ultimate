@@ -46,6 +46,13 @@ pictures still show the old Rev. 1 - note that the Rev. 1 vs. Rev. 2
 differences only matter with regard to the Heathkit ET-3400 machines
 (and only if PicoRAM is used over the extension header).**
 
+## PicoRAM Ultimate in the News
+
+Thanks Gareth Halfacree from [Hackster.io](https://www.hackster.io)
+for [a post about PicoRAM Ultimate Rev. 2](https://www.hackster.io/news/michael-wessel-s-picoram-ultimate-vintage-sbc-expansion-doubles-its-ram-emulation-to-a-generous-4kb-17457264a079) - appreciate it! 
+
+![Hackster Post](pics/hackster.jpg) 
+
 ## Video
 
 [This YouTube video (of the Rev. 1 board)](https://youtu.be/UJutVvjddcg) shows most 
