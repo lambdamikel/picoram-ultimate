@@ -118,6 +118,8 @@ version:](software/et-3400/rev2/io-rom-4kb-1000/sonnet-appleman-dithered.a68)
 
 ![Appleman Dithered Sonnet](pics/mandel2.JPG)
 
+![Appleman Dithered Sonnet 2](pics/mandel-et3400.jpeg)
+
 At the end, I asked Sonnet to [summarize the challenges](software/et-3400/rev2/io-rom-4kb-1000/SONNET-PROCESSES.txt) we faced. 
 
 Copilot "Smart" (GPT 4.5?) came up with a version of [the Sierpinsiki triangle:](software/et-3400/rev2/io-rom-4kb-1000/SIERPINSKI.A68)
