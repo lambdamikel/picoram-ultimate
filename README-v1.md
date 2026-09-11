@@ -296,7 +296,7 @@ The file lists, in this order:
 - 4 lines for the 4 autoload programs for banks 0 to 3 (use an empty line for no program)
 - 0 or 1 - 0 for normal operation, and 1 to enter a debugging program which can be used to determine the above mentioned analog thresholds for the buttons. 
 
-So how do we dermine these analog threshold values in case the 
+So how do we determine these analog threshold values in case the 
 supplied default init file doesn't work for your machine? Read further.
 
 ### Determining Analog Button Thresholds
@@ -475,7 +475,7 @@ RAM_SELECT = A11 & A12 & A13 & A14 & A15 ;
 ```
 
 (`RAM_SELECT` is really a `ROM_SELECT` then). The ROM-decoder GAL
-files are availalable [here.](src/et3400_decoder_0xf800/)
+files are available [here.](src/et3400_decoder_0xf800/)
 
 ![PicoROM](pics/picoram-rom.png)
 

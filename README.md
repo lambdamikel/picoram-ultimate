@@ -122,11 +122,11 @@ version:](software/et-3400/rev2/io-rom-4kb-1000/sonnet-appleman-dithered.a68)
 
 At the end, I asked Sonnet to [summarize the challenges](software/et-3400/rev2/io-rom-4kb-1000/SONNET-PROCESSES.txt) we faced. 
 
-Copilot "Smart" (GPT 4.5?) came up with a version of [the Sierpinsiki triangle:](software/et-3400/rev2/io-rom-4kb-1000/SIERPINSKI.A68)
+Copilot "Smart" (GPT 4.5?) came up with a version of [the Sierpinski triangle:](software/et-3400/rev2/io-rom-4kb-1000/SIERPINSKI.A68)
 
 ![Appleman Dithered Sonnet](pics/sierpinski.jpg)
 
-Two YT vidoes:
+Two YT videos:
 
 - [Sierpinski Triangle](https://youtu.be/HdifqR_9dhs)
 - [Mandelbrot Appleman](https://youtu.be/znStoaQHO1k)
@@ -292,7 +292,7 @@ The file lists, in this order:
 - 4 lines for the 4 autoload programs for banks 0 to 3 (use an empty line for no program)
 - 0 or 1 - 0 for normal operation, and 1 to enter a debugging program which can be used to determine the above mentioned analog thresholds for the buttons. 
 
-So how do we dermine these analog threshold values in case the 
+So how do we determine these analog threshold values in case the 
 supplied default init file doesn't work for your machine? Read further.
 
 ### Determining Analog Button Thresholds
@@ -447,7 +447,7 @@ However, if PicoRAM RAM is mapped into a different region, e.g.,
 starting from address `0x1000` or `0x2000`, then PicoRAM memory can
 coexist in conjunction with the installed SRAM chips. Some users will
 prefer this, as it maximizes the amount of RAM available to the
-system, but the machine code demonstratation programs from the
+system, but the machine code demonstration programs from the
 Heathkit ET-3400 manual would need to be changed / relocated where
 applicable (i.e., any absolute addresses used in these programs).
 
@@ -456,7 +456,7 @@ would be protected from programmatic or monitor-based
 modifications. In ROM emulation mode, the installed monitor (P|EP)ROM
 (IC12) can be removed and emulated by PicoRAM. This allows you to
 replace, modify, or extent the built-in monitor program, without
-having to reprogramm (E)EPROMS. The monitor ROM is 1 KB only and
+having to reprogram (E)EPROMS. The monitor ROM is 1 KB only and
 starts at address `0xfc00`; PicoRAM can either emulate 2 KBs of ROM
 starting from address `0xf800`, or 4 KBs of ROM (PicoRAM Rev. 2 only),
 starting from address `0xf000`. Note that the machine will not run with
@@ -589,7 +589,7 @@ the Towers of Hanoi starting at `0xf800`; the monitor itself starts at
 `0xfc00`. The [4 KB monitor ROM](software/et-3400a/rev2/rom-4kb-f000/)
 (can only be used with PicoRAM Rev. 2) contains the clock at address
 `0xf000` in addition. Note that most programs are identical to the
-ET-3400 versions; only the clock program is different to accomodate
+ET-3400 versions; only the clock program is different to accommodate
 the faster CPU clock.
 
 The same configuration as for the ET-3400 with expansion header
